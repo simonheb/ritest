@@ -112,7 +112,7 @@ program RItest, rclass
 		PERMFile(string)          ///
 		PERMMatchvar(varlist)   ///
 		PERMProgram(name)		///
-		PERMProgramoptions(string) ///
+		PERMPROGRAMOptions(string) ///
 		NOIsily			/// "prefix" options
 		LEft RIght		/// 
 		noHeader		///  not documented
