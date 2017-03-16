@@ -1,4 +1,4 @@
-*! version 0.0.3  27jun2015 based on permute.ado (version 2.7.3  16feb2015).
+*! version 0.0.4  16aug2016 based on permute.ado (version 2.7.3  16feb2015).
 
 
 cap program drop ritest
@@ -13,7 +13,7 @@ cap program drop rit_TableFoot
 cap program drop ClearE
 
 program ritest
-	version 9
+	version 11
 
 	set prefix ritest
 
@@ -38,8 +38,8 @@ program ritest
 end
 
 program RItest, rclass
-	version 9
-	local ritestversion "0.0.3"
+	version 11
+	local ritestversion "0.0.4"
 	// get name of variable to permute
 	gettoken permvar 0 : 0, parse(" ,:")
 	confirm variable `permvar'
@@ -503,20 +503,26 @@ program permute_simple
     syntax , strata(varname) cluster(varname) permvar(varname) *
     
     tempvar ind nn newt rorder
+	//create a random variable
     gen `rorder'=runiform()
     qui {
-    bys `strata' `cluster': gen `ind' = 1 if _n==1
-    sum `ind'
-    if r(N)==_N { //this means that all clusters are of size 1
-        sort `permvar' //this is to shuffle all ovs
-    }
-    bys `strata' `ind': gen `nn'=_n if `ind'!=.
-    sort `rorder' //this is to shuffle all ovs
-    bys `strata' `ind': gen `newt'=`permvar'[`nn']
-    sort `strata' `cluster' `ind'
-    bys `strata' `cluster': replace `newt'=`newt'[_n-1] if missing(`newt')
-    drop `permvar'  `nn' `ind' `rorder'
-    rename `newt' `permvar' 
+		//mark first obs in each cluster
+		bys `strata' `cluster': gen `ind' = 1 if _n==1
+		sum `ind'
+		if r(N)==_N { //this means that all clusters are of size 1
+			sort `permvar' //this is to shuffle all ovs
+		}
+		//across all first observations, generate a count variable
+		bys `strata' `ind': gen `nn'=_n if `ind'!=.
+		//now, reshuffle and across all first observations, take the treatment status from the observation which was at this position before
+		sort `strata' `ind' `rorder'
+		by `strata' `ind': gen `newt'=`permvar'[`nn']
+		//place the first observations on top of each cluster
+		sort `strata' `cluster' `ind'
+		//copy down the treatment status
+		by `strata' `cluster': replace `newt'=`newt'[_n-1] if missing(`newt')
+		drop `permvar'  `nn' `ind' `rorder'
+		rename `newt' `permvar' 
     }
 end
 program permute_extfile
@@ -770,7 +776,7 @@ program rit_DisplayResults, rclass
 	if "`header'" == "" {
 		_coef_table_header, rclass
 		if r(version) >= 2 & "`legend'" == "" {
-			_prefix_legend permute, rclass `verbose'
+			_prefix_legend ritest, rclass `verbose'
 			di as txt %`s(col1)'s "permute var" ":  `r(permvar)'"
 		}
 	}
@@ -922,7 +928,7 @@ program rit_GetEvent, sclass
 end
 
 //program PermVars // "byvars" k var
-//	version 9
+//	version 11
 //	local vv = _caller()
 //	args strata k x
 //	tempvar r y
@@ -948,7 +954,7 @@ end
 //end
 
 //program PermDiV // "byvars" k min max var
-//	version 9
+//	version 11
 //	args strata k min max x
 //	tempvar y
 //	if "`strata'"!="" {

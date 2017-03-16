@@ -205,6 +205,7 @@ as a vertical line.
 {phang}
 {opt noanalytics} suppresses the sending of anonymous usage statistics. If this 
 is not specified and the computer is connected to the internet, ritest will send
+a beacon to the author's google analytics account, containing information on (i)
 the version of stata, (ii) the version of ritest, (iii) the operating system, and (iv) 
 whether program-based, file-based, or automatic permutation was used. No information on 
 the command used, the data used, or any other information regarding the user or the data
@@ -246,13 +247,19 @@ search the .ado-file for "GOOGLE-ANALYTICS" to find the part of the code related
 {phang2}{cmd:.     stratvar(varname) ///<- name of the strata variable}{p_end}
 {phang2}{cmd:.     clustvar(varname) ///<- name of the cluster variable}{p_end}
 {phang2}{cmd:.     *		         ///<- ritest also passes other things to the permutation procedure (e.g. run(#))}{p_end}
-{phang2}{cmd:. 	tempvar rr mr r}{p_end}
+{phang2}{cmd:. 	tempvar mr r}{p_end}
 {phang2}{cmd:. 	qui bys `clustvar': gen `r'=rnormal() if _n==1 // draw one random variable per cluster}{p_end}
 {phang2}{cmd:. 	qui bys `stratvar': egen `mr' = median(`r') if !missing(`r')  // compute median of these random variables within cluster}{p_end}
-{phang2}{cmd:.  qui bys `clustvar': egen `rr' = mode(`r')   	//  impute random variable for all observations within clusters}{p_end}
-{phang2}{cmd:.  replace `permvar' = `rr'>`mr' // replace the permutation var with the new randomization outcome}{p_end}
+{phang2}{cmd:.  replace `permvar' = cond(`r',`r'>`mr',.,.) // replace the permutation var with the new randomization outcome}{p_end}
+{phang2}{cmd:.  sort `clustvar' `r' // 
+{phang2}{cmd:.  by `clustvar': replace `permvar' = `permvar'[_n-1]  if missing(`permvar') // replace the permutation var with the new randomization outcome for all remaining villages}{p_end}
 {phang2}{cmd:. end}{p_end}
 
+
+		 
+		 
+
+		 
 {pstd}Call {cmd:ritest} using the program:{p_end}
 {phang2}{cmd:. ritest t _b[t], permprogram(permme) ///}{p_end}
 {phang2}{cmd:.  permprogramoptions("stratvar(schoolid) clustvar(classid)") ///}{p_end}
@@ -271,9 +278,10 @@ search the .ado-file for "GOOGLE-ANALYTICS" to find the part of the code related
 {title:Author and acknowledgements}
 
 {pstd}
-Simon Heï¿½, Goethe University Frankfurt, ({browse "mailto:hess@econ.uni-frankfurt.de":hess@econ.uni-frankfurt.de}){p_end}
+Simon Heß, Goethe University Frankfurt, ({browse "mailto:hess@econ.uni-frankfurt.de":hess@econ.uni-frankfurt.de}){p_end}
 
 {pstd}
+The latest version of ritest can always be obtained from {browse "https://github.com/simonheb/geocodehere"} or {browse "http://HessS.org"}.
 {p_end}
 
 {pstd}
