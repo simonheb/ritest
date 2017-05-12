@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.0.2  15jul2016}{...}
+{* *! version 1.0.0  21mar2017}{...}
 {vieweralsosee "[R] simulate" "help permute"}{...}
 {vieweralsosee "[R] bootstrap" "help bootstrap"}{...}
 {vieweralsosee "[R] jackknife" "help jackknife"}{...}
@@ -12,7 +12,7 @@
 {title:Title}
 
 {p2colset 5 20 22 2}{...}
-{p2col :{bf:ritest} {hline 2}}Monte Carlo permutation tests, allowing for arbitrary randomization procedures{p_end}
+{p2col :{bf:ritest} {hline 2}}Randomization inference and permutation tests, allowing for arbitrary randomization procedures{p_end}
 {p2colreset}{...}
 
 
@@ -24,7 +24,7 @@ Compute p values for Monte Carlo permutation tests, allowing for arbitrary rando
 
 {p 8 16 2}
 {cmd:ritest}
-	{it:permvar}
+	{it:resampvar}
 	{it:{help exp_list}}
 	[{cmd:,} {it:{help ritest##options_table:options}}]
 	{cmd::} {it:command}
@@ -39,17 +39,17 @@ Compute p values for Monte Carlo permutation tests, allowing for arbitrary rando
 {synopt :{opt r:eps(#)}}perform {it:#} random permutations; default is {cmd:reps(100)}{p_end}
 {synopt :{opt le:ft}|{opt ri:ght}}compute one-sided p-values; default is two-sided{p_end}
 
-{syntab :Automatic permuation}
-{synopt :{opth str:ata(varlist)}}permute {it:permvar} within strata{p_end}
-{synopt :{opth clu:ster(varlist)}}keep {it:permvar} constant within clusters{p_end}
+{syntab :Automatic resampling}
+{synopt :{opth str:ata(varlist)}}permute {it:resampvar} within strata{p_end}
+{synopt :{opth clu:ster(varlist)}}keep {it:resampvar} constant within clusters{p_end}
 
-{syntab :File-based  permuation}
-{synopt :{opth permf:ile(filename)}}take permutations of {it:permvar} from stata data file {it:filename}, containing variables named {it:permvar}1, permvar2, permvar3, ...{p_end}
-{synopt :{opth permm:atchvar(varlist)}}merge permutations in {it:permfile} with the data using these variables (1:1 or m:1){p_end}
+{syntab :File-based  resampling}
+{synopt :{opth samplings:ourcefile(filename)}}take permutations of {it:resampvar} from Stata data file {it:filename}, containing variables named {it:resampvar}1, resampvar2, resampvar3, ...{p_end}
+{synopt :{opth samplingm:atchvar(varlist)}}merge permutations in {it:samplingsourcefile} with the data using these variables (1:1 or m:1){p_end}
 
-{syntab :Program-based permutation}
-{synopt :{opth permp:rogram(it:programname)}}generate permutations of {it:permvar} by calling user-written program {it:programname}{p_end}
-{synopt :{opth permprogramo:ptions(string)}}optionally pass {it:string} as options to {it:programname} {p_end}
+{syntab :Program-based resampling}
+{synopt :{opth samplingp:rogram(it:programname)}}generate permutations of {it:resampvar} by calling user-written program {it:programname}{p_end}
+{synopt :{opth samplingprogramo:ptions(string)}}optionally pass {it:string} as options to {it:programname} {p_end}
 
 {syntab :Reporting}
 {synopt :{opt l:evel(#)}}set confidence level; default is {cmd:level(95)}{p_end}
@@ -58,14 +58,16 @@ Compute p values for Monte Carlo permutation tests, allowing for arbitrary rando
 {synopt :{opt noi:sily}}display any output from {it:command}{p_end}
 
 {syntab :Advanced}
+{synopt :{opt null(outcome value)}}specify a null hypothesis of treatment effect {it:value} or {it:varname}  for outcome {it:outcome} {p_end}
 {synopt :{opt kdens:ityplot}}plot the densities of each statistic in {it:exp_list}{p_end}
+{synopt :{opt kdenstyo:options(string)}}additional options to be passed on to {it:kdensity} {p_end}
+{synopt :{opt saver:esampling(filename)}}save all permutations of {it:resampvar} in a file called {it:filename} for later inspection.{p_end}
 {synopt :{opt noanal:ytics}}do not send anonymized usage statistics to google analytics{p_end}
-
+{synopt :{opt seed(#)}}set random-number seed to #{p_end}
+{synopt :{opt eps}}numerical tolerance; seldom used{p_end}
+{synopt :{opt force}}force  {cmd: ritest} to accept weights in {it:command} {p_end}
 {synoptline}
-{p2colreset}{...}
-{p 4 6 2}{it:weights} are not allowed in {it:command} (they might work, but how they affect the results is unclear).
 {p2colreset}
-
 
 {marker description}{...}
 {title:Description}
@@ -75,37 +77,37 @@ Compute p values for Monte Carlo permutation tests, allowing for arbitrary rando
 simulations.  Unlike permute, ritest allows to specify more complex permutation
 structures, as generated for example by clustered treatment assignments.
 
-{dlgtab:Automatic permutation}
+{dlgtab:Automatic resampling (permutation)}
 
 {pin}
-{cmd:. ritest} {it:permvar} {it:exp_list}{cmd:,} {opt reps(#) strata(stratavar) cluster(clustervar)}{cmd::} {it:command}
+{cmd:. ritest} {it:resampvar} {it:exp_list}{cmd:,} {opt reps(#) strata(stratavar) cluster(clustervar)}{cmd::} {it:command}
 
 {pstd}
-randomly permutes the values in {it:permvar} {it:#} times, respecting strata and clusters, each time executing
+randomly permutes the values in {it:resampvar} {it:#} times, respecting strata and clusters, each time executing
 {it:command} and collecting the associated values from the expressions in
 {it:exp_list}. Not specifying strata assumes no strata were used, which is
 equivalent to all observations being in one single stratum. Not specifying clusters
 assumes no clusters were used, which is equivalent to each observations being a separate cluster.
 
-{dlgtab:File-based permutation}
+{dlgtab:File-based resampling}
 
 {pin}
-{cmd:. ritest} {it:permvar} {it:exp_list}{cmd:,} {opt reps(#) permfile(permutations.dta) permmatchvar(id)}{cmd::} {it:command}
+{cmd:. ritest} {it:resampvar} {it:exp_list}{cmd:,} {opt reps(#) samplingsourcefile(filename) samplingmatchvar(varlist)}{cmd::} {it:command}
 
 {pstd}
-merges the data based on {it:id} {it:#} times using {it:permutations.dta} (1:1, or if ids are not unique m:1). ). 
-It executes {it:command} each time, replacing permvar iteratively with {it:permvar}1, {it:permvar}2, {it:permvar}3, ..., {it:permvar}1000,
-which have to be stored in {it:permutations.dta} prior to executing {cmd: ritest}. 
+merges the data based on {it:varlist} {it:#} times using {it:filename} (1:1, or if ids are not unique m:1). ). 
+It executes {it:command} each time, replacing resampvar iteratively with {it:resampvar}1, {it:resampvar}2, {it:resampvar}3, ..., {it:resampvar}1000,
+which have to be stored in {it:filename} prior to executing {cmd: ritest}. 
 
-{dlgtab:Program-based permutation}
+{dlgtab:Program-based resampling}
 
 {pin}
-{cmd:. ritest} {it:permvar} {it:exp_list}{cmd:,} {opt reps(#) permprogram(progname) permprogramoptions(string)}{cmd::} {it:command}
+{cmd:. ritest} {it:resampvar} {it:exp_list}{cmd:,} {opt reps(#) samplingprogram(progname) samplingprogramoptions(string)}{cmd::} {it:command}
 
 {pstd}
-permutes {it:permvar} by calling a user-written program {it:progname}, and
-passing the string {it:permprogramoptions} as options to this program.
-Also, the program will to be passed at two standard arguments: {it:permvar} is
+permutes {it:resampvar} by calling a user-written program {it:progname}, and
+passing the string {it:samplingprogramoptions} as options to this program.
+Also, the program will to be passed at two standard arguments: {it:resampvar} is
 the variable name of the relevant variable and {it:run} is an integer containing
 the iteration.
 
@@ -113,14 +115,13 @@ the iteration.
 {dlgtab:General}
 
 {pstd}
-{it:left|right} lets p-value estimates be one-sided:  Pr(T* {ul:<} T) or Pr(T* {ul:>} T).
+{it:left|right} computes one sided p-values:  Pr(T* {ul:<} T) or Pr(T* {ul:>} T).
 The default is two-sided:  Pr(|T*| {ul:>} |T|).  Here T* denotes the value of
-the statistic from a randomly permuted dataset, and T denotes the statistic
+the statistic from a randomly permuted data set, and T denotes the statistic
 as computed on the original data.
 
 {pstd}
-{it:permvar} identifies the variable whose observed values will be randomly
-permuted.
+{it:resampvar} identifies the variable for which values will be randomly permuted.
 
 {pstd}
 {it:command} defines the statistical command to be executed.
@@ -160,17 +161,17 @@ performed within each stratum defined by the values of {it:varlist}.
 performed treating each cluster as defined by {it:varlist} as one unit of assignment.
 
 {phang}
-{opth permfile(filename)} specifies that permutations of {it:permvar} have to be taken from stata data-file {it:filename}.
-This dataset should contain variables named [permvarname]1, [permvarname]2, [permvarname]3, ... and a unique id.
+{opth samplingsourcefile(filename)} specifies that permutations of {it:resampvar} have to be taken from Stata data-file {it:filename}.
+This data set should contain variables named [resampvarname]1, [resampvarname]2, [resampvarname]3, ... and a unique id.
 
 {phang}
-{opth permmatchvar(varlist)} merge permutations in from {it:permfile} with the data using these variables (1:1 or m:1 merge).
+{opth samplingmatchvar(varlist)} merge permutations in from {it:samplingsourcefile} with the data using these variables (1:1 or m:1 merge).
 
 {phang}
-{opth permprogram(programname)} specifies that permutations of {it:permvar} be generated by calling user-written {it:programname}.
+{opth samplingprogram(programname)} specifies that permutations of {it:resampvar} be generated by calling user-written {it:programname}.
 
 {phang}
-{opth permprogramoptions(string)}	specifies that when {it:programname} is called {it:string} is also passed string as options to {it:programname}.
+{opth samplingprogramoptions(string)}	specifies that when {it:programname} is called {it:string} is also passed string as options to {it:programname}.
 
 
 {dlgtab:Reporting}
@@ -179,10 +180,6 @@ This dataset should contain variables named [permvarname]1, [permvarname]2, [per
 {opt level(#)} specifies the confidence level, as a percentage,
 for confidence intervals. The default is {cmd:level(95)} or as set by 
 {helpb level:set level}.
-
-{phang}
-{opt verbose} requests that the full table legend be displayed.  By default,
-coefficients and standard errors are not displayed.
 
 {phang}
 {opt nodots} suppresses display of the replication dots.  By default, one 
@@ -198,6 +195,12 @@ option implies the {opt nodots} option.
 {dlgtab:Advanced}
 
 {phang}
+{opt null(outcome value)} allows to test null hypotheses which are different
+from zero. {it:value}  can either be numeric or the name of a variable and will
+be deducted from the variable {it:outcome} before conducting the randomization
+test.
+
+{phang}
 {opt kdensityplot} produces a density plot of the realizations of expressions in
 {it:exp_list}. The realization for the expression in the original data is drawn
 as a vertical line.
@@ -206,7 +209,7 @@ as a vertical line.
 {opt noanalytics} suppresses the sending of anonymous usage statistics. If this 
 is not specified and the computer is connected to the internet, ritest will send
 a beacon to the author's google analytics account, containing information on (i)
-the version of stata, (ii) the version of ritest, (iii) the operating system, and (iv) 
+the version of Stata, (ii) the version of ritest, (iii) the operating system, and (iv) 
 whether program-based, file-based, or automatic permutation was used. No information on 
 the command used, the data used, or any other information regarding the user or the data
 analysis is recorded. If you want to confirm that no other information is being sent,
@@ -216,54 +219,72 @@ search the .ado-file for "GOOGLE-ANALYTICS" to find the part of the code related
 {marker examples}{...}
 {title:Examples}
 
-{pstd} Assume the data consists of observations from 2 schools, each school has 4 classes of 10 students each. Classes were randomly assigned to treatment, stratifying by school. This assured that each school had two treatment and to control classes. The outcome are test scores and the researcher wants to do a fisher test for the sharp null of no treatment effect, in a regression controlling for gender. {p_end}
+{pstd} Attached to this is help file is a (simulated) data set of schools,
+classes, and student test scores. The data consists of observations from 2 schools,
+each school has 4 classes of 10 students each. Classes were randomly assigned to
+treatment, stratifying by school. The stratification assured that each school had
+two treatment and two control classes. The outcome are test scores and the researcher
+wants to conduct fisher randomization test test for the sharp null of no treatment
+effect based on a regression controlling for age. {p_end}
 
-{dlgtab:Automatic permutation}
+{dlgtab:Automatic resampling}
 
 {phang2}{cmd:. ritest treatment _b[treatment], cluster(classid) strata(schoolid): reg testscore treatment age}{p_end}
 
-{dlgtab:File-based permutation}
+{dlgtab:File-based resampling}
 
-{phang2}{cmd:. # assuming you start with an empty datasets of classes containing }{p_end}
-{phang2}{cmd:. # only schoolid and classid}{p_end}
-{phang2}{cmd:. forvalues i = 1/100 (}{p_end}
-{phang2}{cmd:. 		tempvar random cutoff}{p_end}
-{phang2}{cmd:. 		gen `random'=rnormal()}{p_end}
-{phang2}{cmd:. 		bys schoolid: egen `cutoff' = median(`random')}{p_end}
-{phang2}{cmd:. 		gen treatment`i' = `random'> `cutoff'}{p_end}
-{phang2}{cmd:. }}{p_end}
-{phang2}{cmd:. save permutations.dta}{p_end}
-{phang2}{cmd:. use studentdata.dta}{p_end}
-{phang2}{cmd:. ritest treatment _b[treatment], permfile(permutations.dta) permmatchvar(classid)}{p_end}
+{phang2}{cmd: // start with an empty data sets of classes containing }{p_end}
+{phang2}{cmd: // only schoolid and classid}{p_end}
+{phang2}{cmd: use example_classes.dta}{p_end}
+{phang2}{cmd: forvalues i = 1/100 {c -(} //create and save 100 permutations of treatment}{p_end}
+{phang2}{cmd: 		tempvar random cutoff}{p_end}
+{phang2}{cmd: 		gen `random'=rnormal()}{p_end}
+{phang2}{cmd: 		bys schoolid: egen `cutoff' = median(`random')}{p_end}
+{phang2}{cmd: 		gen treatment`i' = `random'> `cutoff'}{p_end}
+{phang2}{cmd: {c )-}}{p_end}
+{phang2}{cmd: tempfile permutations}{p_end}
+{phang2}{cmd: save `permutations'}{p_end}
+{phang2}{cmd: use example_students.dta}{p_end}
+{phang2}{cmd: //using this file}{p_end}
+{phang2}{cmd: ritest treatment _b[treatment], r(500) ///}{p_end}
+{phang2}{cmd:    samplingsourcefile("`permutations'") samplingmatchvar(schoolid classid): ///}{p_end}
+{phang2}{cmd:    reg testscore treatment age, cluster(classid)}{p_end}
+{phang2}{cmd: //redoing the analysis testing the null of the treatment effect being 10(constant)}{p_end}
+{phang2}{cmd: ritest treatment _b[treatment], r(500) null(testscore 10) ///}{p_end}
+{phang2}{cmd:    samplingsourcefile("`permutations'") samplingmatchvar(schoolid classid): ///}{p_end}
+{phang2}{cmd:    reg testscore treatment age, cluster(classid)}{p_end}
+{phang2}{cmd: //redoing the same analysis using automatic resampling}{p_end}
+{phang2}{cmd: ritest treatment _b[treatment], r(500) ///}{p_end}
+{phang2}{cmd:    strata(schoolid) cluster(classid) : ///}{p_end}
+{phang2}{cmd:    reg testscore treatment age, cluster(classid)}{p_end}
 
 {pstd}The benefit of the file-based approach is that more complicated randomization structures can be implemented. For smaller samples, it is also straightforward to implement complete (non-stochastic) Fisher tests, which exhaust all possible permutations{p_end}
 
-{dlgtab:Program-based permutation}
+{dlgtab:Program-based resampling}
 
 {pstd}Define a program to create random permuations:{p_end}
-{phang2}{cmd:. program permme        ///define the program}{p_end}
-{phang2}{cmd:.     syntax ,          ///}{p_end}
-{phang2}{cmd:.     permvar(varname)	 ///<- name of the permutation variable}{p_end}
-{phang2}{cmd:.     stratvar(varname) ///<- name of the strata variable}{p_end}
-{phang2}{cmd:.     clustvar(varname) ///<- name of the cluster variable}{p_end}
-{phang2}{cmd:.     *		         ///<- ritest also passes other things to the permutation procedure (e.g. run(#))}{p_end}
-{phang2}{cmd:. 	tempvar mr r}{p_end}
-{phang2}{cmd:. 	qui bys `clustvar': gen `r'=rnormal() if _n==1 // draw one random variable per cluster}{p_end}
-{phang2}{cmd:. 	qui bys `stratvar': egen `mr' = median(`r') if !missing(`r')  // compute median of these random variables within cluster}{p_end}
-{phang2}{cmd:.  replace `permvar' = cond(`r',`r'>`mr',.,.) // replace the permutation var with the new randomization outcome}{p_end}
-{phang2}{cmd:.  sort `clustvar' `r' // 
-{phang2}{cmd:.  by `clustvar': replace `permvar' = `permvar'[_n-1]  if missing(`permvar') // replace the permutation var with the new randomization outcome for all remaining villages}{p_end}
-{phang2}{cmd:. end}{p_end}
-
-
-		 
-		 
-
+{phang2}{cmd: program permme        //define the program}{p_end}
+{phang2}{cmd:     syntax ,          ///}{p_end}
+{phang2}{cmd:     resampvar(varname)	 ///<- name of the permutation variable}{p_end}
+{phang2}{cmd:     school(varname) ///<- name of the strata variable}{p_end}
+{phang2}{cmd:     class(varname) ///<- name of the cluster variable}{p_end}
+{phang2}{cmd:     *		         //<- ritest also passes other things to the permutation procedure (e.g. run(#))}{p_end}
+{phang2}{cmd:  tempvar mr r}{p_end}
+{phang2}{cmd:  // draw one random variable per cluster}{p_end}
+{phang2}{cmd:  qui bys `school' `class': gen `r'=rnormal() if _n==1 // draw one random variable per cluster}{p_end}
+{phang2}{cmd:  // compute median of these random variables within cluster}{p_end}
+{phang2}{cmd:  qui bys `school': egen `mr' = median(`r') if !missing(`r') }{p_end}
+{phang2}{cmd:  // replace the permutation var with the new randomization outcome}{p_end}
+{phang2}{cmd:  replace `resampvar' = cond(`r',`r'>`mr',.,.) }{p_end}
+{phang2}{cmd:  sort `school' `class' `r' }{p_end}
+{phang2}{cmd:  // replace the permutation var with the new randomization outcome for all remaining villages}{p_end}
+{phang2}{cmd:  by `school' `class': replace `resampvar' = `resampvar'[_n-1]  if missing(`resampvar')}{p_end}
+{phang2}{cmd: end}{p_end}
 		 
 {pstd}Call {cmd:ritest} using the program:{p_end}
-{phang2}{cmd:. ritest t _b[t], permprogram(permme) ///}{p_end}
-{phang2}{cmd:.  permprogramoptions("stratvar(schoolid) clustvar(classid)") ///}{p_end}
-{phang2}{cmd:.  : reg y x t}{p_end}
+{phang2}{cmd: ritest treatment _b[treatment], r(500) samplingprogram(permme) ///}{p_end}
+{phang2}{cmd:  samplingprogramoptions("school(schoolid) class(classid)") : ///}{p_end}
+{phang2}{cmd:    reg testscore treatment, cluster(classid)}{p_end}
 
 {pstd}This method can be used implement any kind of re-randomization.{p_end}
 
@@ -275,13 +296,13 @@ search the .ado-file for "GOOGLE-ANALYTICS" to find the part of the code related
 {help bootstrap},
 {help jackknife}
 
-{title:Author and acknowledgements}
+{title:Author and acknowledgments}
 
 {pstd}
 Simon Heﬂ, Goethe University Frankfurt, ({browse "mailto:hess@econ.uni-frankfurt.de":hess@econ.uni-frankfurt.de}){p_end}
 
 {pstd}
-The latest version of ritest can always be obtained from {browse "https://github.com/simonheb/geocodehere"} or {browse "http://HessS.org"}.
+The latest version of ritest can always be obtained from {browse "https://github.com/simonheb/ritest"} or {browse "http://HessS.org"}.
 {p_end}
 
 {pstd}
@@ -289,4 +310,4 @@ The {cmd:ritest}-code is based on and borrows heavily from the code for {cmd:per
 {p_end}
 
 {pstd}
-I am happy to receive comments and suggestions regarding bugs or possibilites for improvements/extensions.{p_end}
+I am happy to receive comments and suggestions regarding bugs or possibilities for improvements/extensions.{p_end}

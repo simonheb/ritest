@@ -1,5 +1,4 @@
-*! version 0.0.4  16aug2016 based on permute.ado (version 2.7.3  16feb2015).
-
+*! version 1.0.0  21mar2017 based on permute.ado (version 2.7.3  16feb2015).
 
 cap program drop ritest
 cap program drop RItest
@@ -26,11 +25,11 @@ program ritest
 		exit
 	}
 
-//	quietly ssd query
-//	if (r(isSSD)) {
-//		di as err " not possible with summary statistic data"
-//		exit 111
-//	}
+	quietly ssd query
+	if (r(isSSD)) {
+		di as err " not possible with summary statistic data"
+		exit 111
+	}
 	
 
 	preserve
@@ -39,11 +38,11 @@ end
 
 program RItest, rclass
 	version 11
-	local ritestversion "0.0.4"
+	local ritestversion "0.0.5"
 	// get name of variable to permute
-	gettoken permvar 0 : 0, parse(" ,:")
-	confirm variable `permvar'
-	unab permvar : `permvar'
+	gettoken resampvar 0 : 0, parse(" ,:")
+	confirm variable `resampvar'
+	unab resampvar : `resampvar'
 
 	// <my_stuff> : <command>
 	_on_colon_parse `0'
@@ -63,12 +62,13 @@ program RItest, rclass
 		local wgt [`weight'`exp']
 	}
 
-	// parse the command and check for conflicts check all weights and stuff
+	// parse the command and check for conflicts
+	// check all weights and stuff
 	`version' _prefix_command ritest `wgt' `if' `in' , ///
 		`efopt' `level': `command'
 
 	if "`force'" == "" & `"`s(wgt)'"' != "" {
-		// permute does not allow weights
+		// ritest does not allow weights unless force is used
 		local 0 `s(wgt)'
 		syntax [, NONOPTION ]
 	}
@@ -105,47 +105,57 @@ program RItest, rclass
 	syntax  [,			///
 		noDOTS			///
 		Reps(integer 100)	///
-		SAving(string)		///  not documented
+		SAving(string)		///  
+		SAVEResampling(string)		///  save resampvar for every round
 		DOUBle			/// not documented (handles double precision)
 		STRata(varlist)		///
 		CLUster(varlist)        ///
-		PERMFile(string)          ///
-		PERMMatchvar(varlist)   ///
-		PERMProgram(name)		///
-		PERMPROGRAMOptions(string) ///
+		SEED(string)		///
+		EPS(real 1e-7)		/// -Results- options
+		SAMPLINGSourcefile(string)          ///
+		SAMPLINGMatchvar(varlist)   ///
+		SAMPLINGProgram(name)		///
+		null(string) ///
+		SAMPLINGPROGRAMOptions(string) ///
 		NOIsily			/// "prefix" options
 		LEft RIght		/// 
+		STRict			///
 		noHeader		///  not documented
 		noLegend		///  not documented
-		NOANALYtics		/// not documented
+		NOANALYtics		/// 
+		COLLApse		/// not documented an not recommendet
 		KDENSityplot	/// 
+		KDENSITYOptions(string)	///  not documented
 		*			///
 	]
+	_get_diopts diopts, `options' //this makes sure no false options are passed
 
-	if (("`strata'" != "" | "`cluster'" !=  "") & ("`permfile'" != "" | "`permmatchvar'" !=  "")){
-		di as err "Options strata() and cluster() may not be combinded with permfile() and permmatchvar()"
+	if (("`strata'" != "" | "`cluster'" !=  "") + ("`samplingsourcefile'" != "" | "`samplingmatchvar'" !=  "")  + ("`samplingprogram'" != "" | "`samplingprogramoptions'" !=  "") )>1    {
+		di as err "Alternative sampling methods may not be combined."
 		exit 198
+	}
+	if "`saveresampling'"!="" {
+		tempvar originalorder
+		tempfile preservetemp
+		gen `originalorder'=_n
+		qui save `"`saveresampling'"'
 	}
 	if "`strata'" == "" {
             tempvar strata
             gen `strata' = 1
         }
-        if "`cluster'" == "" {
+    if "`cluster'" == "" {
             tempvar cluster 
             gen `cluster' = _n
-        }
-        ///check validy of clusters
-        qui loneway `permvar' `cluster'
-        if (r(sd_w) != 0 & !missing(r(sd_w))) {
-            di as err "`permvar' doesnt seem to be constant within clusters"
-            exit 9999
-        }
-        qui loneway `permvar' `strata'
-        if (r(sd_w) == 0){
-            di as err "Warning: some strata contain no variation in `permvar'"
-        }
+    }
+
         
-        
+    // set the seed
+	if "`seed'" != "" {
+		`version' set seed `seed'
+	}
+	local seed `c(seed)'
+   
 	if "`noisily'" != "" {
 		local dots nodots
 	}
@@ -153,7 +163,19 @@ program RItest, rclass
 	local dots = cond("`dots'" != "", "*", "_dots")
 	local noi = cond("`noisily'"=="", "*", "noisily")
 
-//I have no clue what this does:
+	if "`samplingsourcefile'"!="" { //check if samplingsourcefile is okay and sort
+            preserve
+            qui use "`samplingsourcefile'", clear
+            qui sort `samplingmatchvar', stable
+            qui desc
+            if (r(k)-1)<`reps' {
+                di as err "Permutation dataset does not contain enough permutations to complete `reps' repetitions"
+                exit 2001
+            }
+            qui save `"`samplingsourcefile'"', replace
+            restore
+    }
+
 	// preliminary parse of <exp_list>
 	_prefix_explist `exp_list', stub(_pm_)
 	local eqlist	`"`s(eqlist)'"'
@@ -164,55 +186,42 @@ program RItest, rclass
 	_prefix_note `cmdname', `nodots'
 	if "`noisily'" != "" {
 		di "ritest: First call to `cmdname' with data as is:" _n
-		di as inp `". `command'"'
+	
 	}
-//until here
+     
+	// run the command using the entire dataset (for output)
+	`command'
 
-        if "`permfile'"!="" { //check if permfile is okay and sort
-            preserve
-            qui use `permfile', clear
-            qui sort `permmatchvar', stable
-            qui desc
-            if (r(k)-1)<`reps' {
-                di as err "Permutation dataset does not contain enough permutations to complete `reps' repetitions"
-                exit 2001
-            }
-            qui save `permfile', replace
-            restore
-        }
-
-	// run the command using the entire dataset
 	preserve
+	if ("`null'"!="") {
+		di as text "User specified non-zero null hypothesis" 
+		local vari : word 1 of `null'
+		local valu : word 2 of `null'
+		capture confirm variable `vari'
+		if (_rc != 0) {
+			di as err "Hypotheses seem to be misspecified, `vari' is not a variable in the current data set"
+			exit 9
+		}
+		cap confirm number `valu'
+		if (_rc!=0) {
+			capture confirm variable `valu'
+		}
+		if (_rc != 0) {
+			di as err "Hypotheses seem to be misspecified, second argument to hypothesis has to be numeric or a varialbe name"
+			exit 9
+		}
+		di as text "Under the null hypothesis:" 
+		di as text " `vari' has treatment effect: `resampvar'*`valu'"
+		qui replace `vari' = `vari' - `resampvar'*`valu'
+		di as text " (these values are being subtracted from the outcome)"
+	}
+
+				
+
 	_prefix_clear, e r
-	capture noisily quietly `noisily'		///
+	// run the command using the entire dataset (to get the estimate)
+	qui `noisily'		///
                 `command'
-//	local rc = c(rc)
-	//local checkmat 0
-	//capture confirm matrix e(b) e(V)
-        //if !_rc {
-         //       tempname fullmat
-           //     _check_omit `fullmat',get
-		//local checkmat 1
-//        }
-	// error occurred while running on entire dataset
-	//if `rc' {
-	//	_prefix_run_error `rc' permute `cmdname'
-	//}
-	// check for rejection of results from entire dataset
-	//if `"`reject'"' != "" {
-	//	_prefix_reject permute `cmdname' : `reject'
-	//	local reject `"`s(reject)'"'
-	//}
-
-	// check e(sample)
-//	_prefix_check4esample permute `cmdname'
-//	if "`drop'" == "" {
-//		local keepesample `"`s(keep)'"'
-//	}
-//	if "`warn'" == "" {
-//		local diwarn	`"`s(diwarn)'"'
-//	}
-
 	// expand eexp's that may be in eexplist, and build a matrix of the
 	// computed values from all expressions
 	tempname b
@@ -222,7 +231,7 @@ program RItest, rclass
 		colna(`idlist')			///
 		coleq(`eqlist')			///
 
-        local k_eq	`s(k_eq)'
+    local k_eq	`s(k_eq)'
 	local k_exp	`s(k_exp)'   //number of expressions
 	local k_eexp	`s(k_eexp)'  //number of eexpressions
 	local K = `k_exp' + `k_eexp' //number of expression + eexprsessions
@@ -244,8 +253,9 @@ program RItest, rclass
 	}
 
 
-	local ropts	///eps(`eps')		///
+	local ropts	eps(`eps')		///
 			`left' `right'		///
+			`strict'             ///
 			level(`level')		///
 			`header'		///
 			`verbose'		///
@@ -270,54 +280,73 @@ program RItest, rclass
 		}
 		local replace	`"`s(replace)'"'
 	}
-
 	if `"`strata'"' != "" {
-		if `:list permvar in strata' {
+		if `:list resampvar in strata' {
 			di as err "permutation variable may not be specified in strata() option"
 			exit 198
 		}
-//		tempvar sflag touse
-//		mark `touse'
-//		markout `touse' `strata'
-//		sort `touse' `strata', stable
-//		by `touse' `strata': gen `sflag' = _n==1 if `touse'
-//		qui replace `sflag' = sum(`sflag')
-//		local nstrata = `sflag'[_N]
-//		local ustrata `strata'
-//		local strata `sflag'
+		tempvar sflag touse
+		mark `touse'
+		markout `touse' `strata'
+		sort `touse' `strata', stable
+		by `touse' `strata': gen `sflag' = _n==1 if `touse'
+		qui replace `sflag' = sum(`sflag')
+		local nstrata = `sflag'[_N]
+		local ustrata `strata'
+		local strata `sflag'
 		sort `strata' , stable
+		
+		qui loneway `resampvar' `strata'
+		if (r(sd_w) == 0){
+			di as err "Warning: some strata contain no variation in `resampvar'"
+		}
 	}
 	if `"`cluster'"' != "" {
-		if `:list permvar in strata' {
-			di as err "cluster variable may not be specified in strata() option"
+		if `:list resampvar in strata' {
+			di as err "permutation variable may not be specified in strata() option"
 			exit 198
 		}
-		sort `cluster' , stable
-        }
+		tempvar cflag touse
+		mark `touse'
+		markout `touse' `strata' `cluster'  
+		sort  `touse' `strata' `cluster' , stable
+		by `touse' `strata' `cluster': gen `cflag' = _n==1 if `touse'
+		qui replace `cflag' = sum(`cflag')
+		local N_clust = `cflag'[_N]
+		local clustvar `cluster'
+		local cluster `cflag'
+		sort  `strata' `cluster', stable
+		
+		qui loneway `resampvar' `cflag'
+		if (r(sd_w) != 0 & !missing(r(sd_w))) {
+			di as err "`resampvar' doesnt seem to be constant within clusters"
+			exit 9999
+		}
+	}
+    
+	
 	local obs = _N
-	if "`strata'"!="" {
-		local bystrata "bys `strata',stable:"
-	}
-	if "`cluster'"!="" {
-		local bycluster "bys `cluster',stable:"
-	}
-        local method 0
-	if "`permfile'"!="" | "`permmatchvar'"!="" {
+	local method 0
+	if "`samplingsourcefile'"!="" | "`samplingmatchvar'"!="" {
             local method extfile
-            
 	}
-	else if "`permprogram'"!="" {
+	else if "`samplingprogram'"!="" {
             local method program
-			cap program list `permprogram'
+			cap program list `samplingprogram'
 			if _rc!=0 {
-				di as err "permuation proceedure (`permprogram') does not exists"
+				di as err "resampling proceedure (`samplingprogram') does not exists"
 				exit 198
 			}
 	}
 	else {
             local method permute
-        }
+    }
 
+	if `eps' < 0 {
+		di as err "eps() must be greater than or equal to zero"
+		exit 198
+	}
+	
 	// temp variables for post
 	local stats
 	forvalues j = 1/`K' {    //fore each expression generate a tempvar
@@ -332,35 +361,18 @@ program RItest, rclass
 		`double' `every' `replace'
 	post `postnam' `stats'
 
-	// check if `permvar' is a single dichotomous variable
-//	tempvar v
-//	qui summarize `permvar'
-//	local binary 0
-//	capture assert r(N)==_N & (`permvar'==r(min) | `permvar'==r(max))
-//	if c(rc)==0 {
-//		tempname min max
-//		scalar `min' = r(min)
-//		scalar `max' = r(max)
-//
-//		qui `bystrata' gen long `v' = sum(`permvar'==`max')
-//		qui `bystrata' replace `v' = `v'[_N]
-//
-//		local binary 1
-//	}
-//	else	gen `c(obs_t)' `v' = _n
-
 	//methods such as "external file" or "automatic permuations" are wrapped in the third one
 	if "`method'"=="permute" {
-		local permprogram permute_simple
-		local permprogramoptions "strata(`strata')     cluster(`cluster')"
+		local samplingprogram permute_simple
+		local samplingprogramoptions "strata(`strata')     cluster(`cluster')"
     }
 	else if "`method'"=="extfile" {
-		local permprogram permute_extfile
-		local permprogramoptions "file(`permfile')      matchvars(`permmatchvar')"
+		local samplingprogram permute_extfile
+		local samplingprogramoptions `"file("`samplingsourcefile'")      matchvars(`samplingmatchvar')"'
     }
 	
-	if ("`noanalytics'"=="") 	{ //This is the GOOGLE-ANALYTICS bitL
-		set timeout1 1
+	if ("`noanalytics'"=="") 	{ //This is the GOOGLE-ANALYTICS bit
+		set timeout1 1 //make sure this doesnt cause the code to halt for longer periods
 		set timeout2 1
 		tempfile foo
 		cap copy "https://www.google-analytics.com/collect?payload_data&z=`:di round(runiform()*1000)'&v=1&tid=UA-65758570-2&cid=5555&t=pageview&dp=`method'&dt=Stata`di:  version'-$S_OS-$S_OSDTL&el=plain`kdensityplot'" `foo', replace
@@ -374,16 +386,27 @@ program RItest, rclass
 	// do permutations
 	if "`nodots'" == "" | "`noisily'" != "" {
 		di
-		_dots 0, title(Permutation replications) reps(`reps') `nodots'
+		_dots 0, title(Resampling replications) reps(`reps') `nodots'
 	}
 	local rejected 0
 	forvalues i = 1/`reps' {
-		cap `permprogram', run(`i') permvar(`permvar') `permprogramoptions'
+		cap `samplingprogram', run(`i') resampvar(`resampvar') `samplingprogramoptions'
 		if _rc!=0 {
-			di as err "Failed while calling permuation proceedure. Call was: " _n "{stata `permprogram', run(`i') permvar(`permvar') `permprogramoptions'}" _n as text "Error was: " 
+			di as err "Failed while calling resampling proceedure. Call was: " _n "{stata `samplingprogram', run(`i') resampvar(`resampvar') `samplingprogramoptions'}" _n as text "Error was: " 
 			error _rc
 		}	
-        
+     	if "`saveresampling'"!="" {
+			qui 	 `preservetemp',replace
+			rename `resampvar' `resampvar'`i'
+			cap qui merge 1:1 `originalorder' using `"`saveresampling'"', gen(_m`i')
+			rename `originalorder' keep`originalorder'
+			drop __*
+			rename keep`originalorder' `originalorder'
+			cap order `resampvar'* _m*, last
+			qui save `"`saveresampling'"', replace
+			use `preservetemp', clear
+		}
+		
 		// analyze permuted data
 		`noi' di as inp `". `command'"'
 		capture `noiqui' `noisily'  `command'
@@ -395,32 +418,6 @@ program RItest, rclass
 			post `postnam' `mis'
 		}
 		else {
-//			if `checkmat' {
-                            //_check_omit `fullmat', check result(res)
-                              //  if `res' {
-                                //        local bad 1
-                                  //      `noi' di as error ///
-//`"{p 0 0 2}collinearity in replicate sample is "' ///
-//`"not the same as the full sample, posting missing values{p_end}"'
-//					post `postnam' `mis'
-  //                                      `dots' `i' `bad'
-    //                                    continue
-      //                          }
-        //                }
-			//if `"`reject'"' != "" {
-			//	capture local rejected = `reject'
-			//	if c(rc) {
-			//		local rejected 1
-			//	}
-			//}
-			//if `rejected' {
-			//	local bad 1
-			//	`noi' di as error ///
-//`"{p 0 0 2}rejected results from `cmdname', "' ///
-//`"posting missing values{p_end}"'
-//				post `postnam' `mis'
-//			}
-//			else {
 				forvalues j = 1/`K' {
 					capture scalar `x`j'' = `exp`j''
 					if (c(rc) == 1) error 1
@@ -452,7 +449,14 @@ program RItest, rclass
 		}
 		error c(rc)
 	}
-	label data `"permute `permvar' : `cmdname'"'
+	if ("`collapse'" != "") {
+		di as err "collapsing"
+		gen uh=0
+		collapse uh,by(_*)
+		drop uh
+	}	
+	
+	label data `"ritest `resampvar' : `cmdname'"'
 	// save permute characteristics and labels to data set
 	forvalues i = 1/`K' {
 		local name : word `i' of `names'
@@ -474,19 +478,25 @@ program RItest, rclass
 	if ("`kdensityplot'" != "") {
 		foreach var of varlist * {
 			qui sum `var' in 1, meanonly
-			local a=r(mean)
-			kdensity `var' in 2/-1, xline(`a') name(`var')
+			local realization=r(mean)
+			local kopt=subinstr(`"`kdensityoptions'"',"{realization}","`realization'",.)
+			kdensity `var' in 2/-1, xline(`realization') name(`var', replace)  graphregion(color(white)) `kopt'
 		}
 	}
+
+		
 	char _dta[k_eq] `k_eq'
 	char _dta[k_eexp] `k_eexp'
 	char _dta[k_exp] `k_exp'
 	char _dta[N_strata] `nstrata'
-/*HERE I NEED TO ADD STUFF*/
+	char _dta[N_clust] `N_clust'
+	char _dta[seed] "`seed'"
 	char _dta[strata] `ustrata'
+	char _dta[clustvar] `clustvar'
 	char _dta[N] `obs'
-	char _dta[permvar] "`permvar'"
+	char _dta[resampvar] "`resampvar'"
 	char _dta[command] "`command'"
+	char _dta[sampling_method] "`method'"
 	
 	quietly drop in 1
 
@@ -495,54 +505,56 @@ program RItest, rclass
 	}
 
 	ClearE
-	rit_Results, `ropts'
+	rit_Results, `ropts' 
 	return add
 	return scalar N_reps = `reps'
 end
 program permute_simple
-    syntax , strata(varname) cluster(varname) permvar(varname) *
+    syntax , strata(varname) cluster(varname) resampvar(varname) *
     
     tempvar ind nn newt rorder
 	//create a random variable
     gen `rorder'=runiform()
     qui {
 		//mark first obs in each cluster
-		bys `strata' `cluster': gen `ind' = 1 if _n==1
+		sort `strata' `cluster', stable
+		by `strata' `cluster': gen `ind' = 1 if _n==1
 		sum `ind'
 		if r(N)==_N { //this means that all clusters are of size 1
-			sort `permvar' //this is to shuffle all ovs
+			sort `resampvar' //this is to shuffle all ovs
 		}
 		//across all first observations, generate a count variable
-		bys `strata' `ind': gen `nn'=_n if `ind'!=.
+		sort `strata' `ind', stable
+		by `strata' `ind': gen `nn'=_n if `ind'!=.
 		//now, reshuffle and across all first observations, take the treatment status from the observation which was at this position before
-		sort `strata' `ind' `rorder'
-		by `strata' `ind': gen `newt'=`permvar'[`nn']
+		sort `strata' `ind' `rorder', stable
+		by `strata' `ind': gen `newt'=`resampvar'[`nn']
 		//place the first observations on top of each cluster
-		sort `strata' `cluster' `ind'
+		sort `strata' `cluster' `ind', stable
 		//copy down the treatment status
 		by `strata' `cluster': replace `newt'=`newt'[_n-1] if missing(`newt')
-		drop `permvar'  `nn' `ind' `rorder'
-		rename `newt' `permvar' 
+		drop `resampvar'  `nn' `ind' `rorder'
+		rename `newt' `resampvar' 
     }
 end
 program permute_extfile
-    syntax ,file(string) matchvars(varlist) run(integer) permvar(varlist)
+    syntax ,file(string) matchvars(varlist) run(integer) resampvar(varlist)
     sort `matchvars'
     cap isid `matchvars'
     if c(rc) {
-        capture qui merge m:1 `matchvars' using `file', keepusing(`permvar'`run') nogen 
+        capture qui merge m:1 `matchvars' using `file', keepusing(`resampvar'`run') nogen 
         if c(rc) {
-            di as err "`permvar'`run' does not exist in the permutation data set"
+            di as err "`resampvar'`run' does not exist in the permutation data set"
         }
     }
     else {
-        capture qui merge 1:1 `matchvars' using `file', keepusing(`permvar'`run') nogen 
+        capture qui merge 1:1 `matchvars' using `file', keepusing(`resampvar'`run') nogen 
         if c(rc) {
-            di as err "`permvar'`run' does not exist in the permutation data set"
+            di as err "`resampvar'`run' does not exist in the permutation data set"
         }
     }
-    drop `permvar'
-    rename `permvar'`run' `permvar'
+    drop `resampvar'
+    rename `resampvar'`run' `resampvar'
 end
 program rit_Results  //output the results in a nice table
 	syntax [anything(name=namelist)]	///
@@ -550,6 +562,7 @@ program rit_Results  //output the results in a nice table
 			eps(real 1e-7)		/// -GetResults- options
 			left			///
 			right			///
+			strict			///
 			TItle(passthru)		///
 			Level(cilevel)		/// -DisplayResults- options
 			noHeader		///
@@ -558,7 +571,6 @@ program rit_Results  //output the results in a nice table
 			notable			/// not documented
 			*			///
 		]
-
 	_get_diopts diopts, `options'
 	if `"`using'"' != "" {
 		preserve
@@ -575,12 +587,13 @@ program rit_Results  //output the results in a nice table
 		local 0
 		syntax [varlist]
 	}
-
+	
 	rit_GetResults `varlist',	///
 		eps(`eps')	///
-		`left' `right'	///
+		`left' `right'	`strict' ///
 		level(`level')	///
 		`title'
+		
 	rit_DisplayResults, `header' `table' `legend' `verbose' `diopts'
 end
 
@@ -588,22 +601,13 @@ end
 program rit_GetResults, rclass
 	syntax varlist [,		///
 		Level(cilevel)		///
-		eps(real 1e-7)		///
+		eps(real 1e-7)		/// -GetResults- options
 		left			///
 		right			///
+		strict			///
 		TItle(string asis)	///
 	]
 
-	// get data characteristics
-	// data version
-	local version : char _dta[pm_version]
-	capture confirm integer number `version'
-	if c(rc) | "`version'" == "" {
-		local version 1
-	}
-	else if `version' <= 0 {
-		local version 1
-	}
 	// original number of observations
 	local obs : char _dta[N]
 	if "`obs'" != "" {
@@ -623,6 +627,14 @@ program rit_GetResults, rclass
 			local nstrata
 		}
 	}
+	// number of cluster
+	local N_clust : char _dta[N_clust]
+	if "`N_clust'" != "" {
+		capture confirm integer number `N_clust'
+		if c(rc) {
+			local N_clust
+		}
+	}
 	// strata variable
 	if "`nstrata'" != "" {
 		local strata : char _dta[strata]
@@ -633,26 +645,38 @@ program rit_GetResults, rclass
 			}
 		}
 	}
-	// permutation variable
-	local permvar : char _dta[permvar]
-	capture confirm name `permvar'
-	if c(rc) | `:word count `permvar'' != 1 {
-		local permvar
+	// cluster variable
+	if "`N_clust'" != "" {
+		local clustvar : char _dta[clustvar]
+		if "`clustvar'" != "" {
+			capture confirm names `clustvar'
+			if c(rc) {
+				local clustvar
+			}
+		}
 	}
-	if `"`permvar'"' == "" {
+	// permutation method
+	local sampling_method : char _dta[sampling_method]
+	// permutation variable
+	local resampvar : char _dta[resampvar]
+	capture confirm name `resampvar'
+	if c(rc) | `:word count `resampvar'' != 1 {
+		local resampvar
+	}
+	if `"`resampvar'"' == "" {
 		di as error ///
 "permutation variable name not present as data characteristic"
 		exit 9
 	}
 
 	// requested event
-	rit_GetEvent, `left' `right' eps(`eps')
+	rit_GetEvent, `left' `right' `strict' eps(`eps')
 	local event `s(event)'
 	local rel `s(rel)'
 	local abs `s(abs)'
 	local minus `"`s(minus)'"'
 
-	tempvar diff
+	tempvar diff //geqdiff
 	gen `diff' = 0
 	local K : word count `varlist'
 	tempname b c reps p se ci
@@ -676,6 +700,7 @@ program rit_GetResults, rclass
 		}
 		quietly replace ///
 		`diff' = (`abs'(`name') `rel' `abs'(`value') `minus' `eps')
+		
 		sum `diff' if `name'<., meanonly
 		if r(N) < c(N) {
 			local missing missing
@@ -687,27 +712,22 @@ program rit_GetResults, rclass
 		mat `se'[1,`j'] = r(se)
 		mat `ci'[1,`j'] = r(lb)
 		mat `ci'[2,`j'] = r(ub)
+		
+		
 		local coleq `"`coleq' `"`:char `name'[coleq]'"'"'
 		local colname `colname' `:char `name'[colname]'
-		if `version' >= 2 {
-			local exp`j' : char `name'[expression]
-		}
+		local exp`j' : char `name'[expression]
 		if `"`:char `name'[is_eexp]'"' == "1" {
 			local ++k_eexp	
 		}
 	}
 	local coleq : list clean coleq
 
-	if `version' >= 2 {
-		// command executed for each permutation
-		local command : char _dta[command]
-		local k_exp = `K' - `k_eexp'
-	}
-	else {
-		local k_eexp 0
-		local k_exp 0
-	}
+	// command executed for each permutation
+	local command : char _dta[command]
+	local k_exp = `K' - `k_eexp'
 
+	
 	// put stripes on matrices
 	if `"`coleq'"' == "" {
 		version 11: matrix colnames `b' = `varlist'
@@ -725,7 +745,6 @@ program rit_GetResults, rclass
 
 	// Save results
 	return clear
-	return hidden scalar version = `version'
 	if "`obs'" != "" {
 		return scalar N = `obs'
 	}
@@ -741,25 +760,33 @@ program rit_GetResults, rclass
 	return hidden local seed `seed'
 	return local rngstate `seed'
 	return local missing `missing'
-	return local permvar `permvar'
+	return local resampvar `resampvar'
 	if "`nstrata'" != "" {
 		return scalar N_strata = `nstrata'
 		if "`strata'" != "" {
 			return local strata `strata'
 		}
 	}
+	if "`N_clust'" != "" {
+		return scalar N_clust = `N_clust'
+		if "`clustvar'" != "" {
+			return local clustvar `clustvar'
+		}
+	}
 	return local event `event'
 	return local left `left'
 	return local right `right'
+	return local strict `strict'
 	forval i = 1/`K' {
 		return local exp`i' `"`exp`i''"'
 	}
 	if `"`title'"' != "" {
 		return local title `"`title'"'
 	}
-	else	return local title "Monte Carlo permutation results"
+	else	return local title "Monte Carlo results"
 	return local command `"`command'"'
-	return local cmd permute
+	return local sampling_method `"`sampling_method'"'
+	return local cmd ritest
 end
 
 
@@ -771,14 +798,35 @@ program rit_DisplayResults, rclass
 		notable			///
 		*			///
 	]
-
 	_get_diopts diopts, `options'
 	if "`header'" == "" {
-		_coef_table_header, rclass
-		if r(version) >= 2 & "`legend'" == "" {
-			_prefix_legend ritest, rclass `verbose'
-			di as txt %`s(col1)'s "permute var" ":  `r(permvar)'"
+		//this is supposed to produce a nice header, but doesn't because _coef_table_header doesn't no ritest, so I do it manuallly
+		//_coef_table_header, rclass
+		
+		_prefix_legend ritest, rclass `verbose'
+		di as txt %`s(col1)'s "res. var(s)" ":  `r(resampvar)'"
+		
+		if "`r(sampling_method)'"=="extfile" {
+			di as txt %`s(col1)'s "Resampling" as text ":  Using an external file"
 		}
+		else if "`r(sampling_method)'"=="program" {
+			di as txt %`s(col1)'s "Resampling" as text ":  Using a user-specified program"
+		}
+		else if "`r(sampling_method)'"=="permute" {
+			di as txt %`s(col1)'s "Resampling" as text ":  Permuting `r(resampvar)'"
+			if !missing(r(N_clust)) & "`r(clustvar)'" != "" {
+				di as txt %`s(col1)'s "Clust. var(s)" as res ":  `r(clustvar)'"
+				di as txt %`s(col1)'s "Clusters" as res ":  `r(N_clust)'"
+			}
+			if !missing(r(N_strata)) & "`r(strata)'" != "" {
+				di as txt %`s(col1)'s "Strata var(s)" as res ":  `r(strata)'"
+				di as txt %`s(col1)'s "Strata" as res ":  `r(N_strata)'"
+			}
+		}
+		else {
+			di as txt %`s(col1)'s "Resampling" as text proper(":  `sampling_method'")
+		}
+		
 	}
 
 	// NOTE: _coef_table_header needs the results in r() to work properly,
@@ -904,70 +952,33 @@ end
 
 program rit_GetEvent, sclass
 	sret clear
-	syntax [, left right eps(string)]
+	syntax [, left right strict eps(string)]
 	if "`left'"!="" & "`right'"!="" {
 		di as err "only one of left or right can be specified"
 		exit 198
 	}
+	local unstrict
+	if "`strict'"=="" {
+			local unstrict="="
+	}
 	if "`left'"!="" {
-		sreturn local event "T <= T(obs)"
-		sreturn local rel "<="
+		sreturn local event "T <`unstrict' T(obs)"
+		sreturn local rel "<`unstrict'"
 		sreturn local minus "+"
 	}
 	else if "`right'"!="" {
-		sreturn local event "T >= T(obs)"
-		sreturn local rel ">="
+		sreturn local event "T >`unstrict' T(obs)"
+		sreturn local rel ">`unstrict'"
 		sreturn local minus "-"
 	}
 	else {
-		sreturn local event "|T| >= |T(obs)|"
-		sreturn local rel ">="
+		sreturn local event "|T| >`unstrict' |T(obs)|"
+		sreturn local rel ">`unstrict'"
 		sreturn local abs "abs"
 		sreturn local minus "-"
 	}
 end
 
-//program PermVars // "byvars" k var
-//	version 11
-//	local vv = _caller()
-//	args strata k x
-//	tempvar r y
-//	quietly {
-//		if `vv' <= 9 {
-//			if "`strata'"!="" {
-//				by `strata': gen double `r' = uniform()
-//			}
-//			else	gen double `r' = uniform()
-//		}
-//		else {
-//			tempname w
-//			gen double `r' = uniform()
-//			gen double `w' = uniform()
-//		}
-//
-//		sort `strata' `r' `w'
-//		local type : type `x'
-//		gen `type' `y' = `x'[`k']
-//		drop `x'
-//		rename `y' `x'
-//	}
-//end
-
-//program PermDiV // "byvars" k min max var
-//	version 11
-//	args strata k min max x
-//	tempvar y
-//	if "`strata'"!="" {
-//		sort `strata'
-//		local bystrata "by `strata':"
-//	}
-//	quietly {
-//		gen byte `y' = . in 1
-//		`bystrata' replace `y' = ///
-//			uniform()<(`k'-sum(`y'[_n-1]))/(_N-_n+1)
-//		replace `x' = cond(`y',`max',`min')
-//	}
-//end
 
 program rit_TableFoot 
 	args event K missing
