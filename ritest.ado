@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 *! version 1.0.0  21mar2017 based on permute.ado (version 2.7.3  16feb2015).
-=======
-*! version 0.0.5  01dec2016 based on permute.ado (version 2.7.3  16feb2015).
->>>>>>> origin/master
 
 cap program drop ritest
 cap program drop RItest
@@ -119,10 +115,7 @@ program RItest, rclass
 		SAMPLINGSourcefile(string)          ///
 		SAMPLINGMatchvar(varlist)   ///
 		SAMPLINGProgram(name)		///
-<<<<<<< HEAD
 		null(string) ///
-=======
->>>>>>> origin/master
 		SAMPLINGPROGRAMOptions(string) ///
 		NOIsily			/// "prefix" options
 		LEft RIght		/// 
@@ -145,11 +138,7 @@ program RItest, rclass
 		tempvar originalorder
 		tempfile preservetemp
 		gen `originalorder'=_n
-<<<<<<< HEAD
 		qui save `"`saveresampling'"'
-=======
-		qui save `saveresampling'
->>>>>>> origin/master
 	}
 	if "`strata'" == "" {
             tempvar strata
@@ -176,22 +165,14 @@ program RItest, rclass
 
 	if "`samplingsourcefile'"!="" { //check if samplingsourcefile is okay and sort
             preserve
-<<<<<<< HEAD
             qui use "`samplingsourcefile'", clear
-=======
-            qui use `samplingsourcefile', clear
->>>>>>> origin/master
             qui sort `samplingmatchvar', stable
             qui desc
             if (r(k)-1)<`reps' {
                 di as err "Permutation dataset does not contain enough permutations to complete `reps' repetitions"
                 exit 2001
             }
-<<<<<<< HEAD
             qui save `"`samplingsourcefile'"', replace
-=======
-            qui save `samplingsourcefile', replace
->>>>>>> origin/master
             restore
     }
 
@@ -208,13 +189,9 @@ program RItest, rclass
 	
 	}
      
-<<<<<<< HEAD
 	// run the command using the entire dataset (for output)
 	`command'
 
-=======
-	// run the command using the entire dataset
->>>>>>> origin/master
 	preserve
 	if ("`null'"!="") {
 		di as text "User specified non-zero null hypothesis" 
@@ -245,10 +222,6 @@ program RItest, rclass
 	// run the command using the entire dataset (to get the estimate)
 	qui `noisily'		///
                 `command'
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
 	// expand eexp's that may be in eexplist, and build a matrix of the
 	// computed values from all expressions
 	tempname b
@@ -395,11 +368,7 @@ program RItest, rclass
     }
 	else if "`method'"=="extfile" {
 		local samplingprogram permute_extfile
-<<<<<<< HEAD
 		local samplingprogramoptions `"file("`samplingsourcefile'")      matchvars(`samplingmatchvar')"'
-=======
-		local samplingprogramoptions "file(`samplingsourcefile')      matchvars(`samplingmatchvar')"
->>>>>>> origin/master
     }
 	
 	if ("`noanalytics'"=="") 	{ //This is the GOOGLE-ANALYTICS bit
@@ -427,24 +396,14 @@ program RItest, rclass
 			error _rc
 		}	
      	if "`saveresampling'"!="" {
-<<<<<<< HEAD
 			qui 	 `preservetemp',replace
 			rename `resampvar' `resampvar'`i'
 			cap qui merge 1:1 `originalorder' using `"`saveresampling'"', gen(_m`i')
-=======
-			qui save `preservetemp',replace
-			rename `resampvar' `resampvar'`i'
-			cap qui merge 1:1 `originalorder' using `saveresampling', gen(_m`i')
->>>>>>> origin/master
 			rename `originalorder' keep`originalorder'
 			drop __*
 			rename keep`originalorder' `originalorder'
 			cap order `resampvar'* _m*, last
-<<<<<<< HEAD
 			qui save `"`saveresampling'"', replace
-=======
-			qui save `saveresampling', replace
->>>>>>> origin/master
 			use `preservetemp', clear
 		}
 		
@@ -696,11 +655,8 @@ program rit_GetResults, rclass
 			}
 		}
 	}
-<<<<<<< HEAD
 	// permutation method
 	local sampling_method : char _dta[sampling_method]
-=======
->>>>>>> origin/master
 	// permutation variable
 	local resampvar : char _dta[resampvar]
 	capture confirm name `resampvar'
@@ -829,10 +785,7 @@ program rit_GetResults, rclass
 	}
 	else	return local title "Monte Carlo results"
 	return local command `"`command'"'
-<<<<<<< HEAD
 	return local sampling_method `"`sampling_method'"'
-=======
->>>>>>> origin/master
 	return local cmd ritest
 end
 
@@ -849,7 +802,6 @@ program rit_DisplayResults, rclass
 	if "`header'" == "" {
 		//this is supposed to produce a nice header, but doesn't because _coef_table_header doesn't no ritest, so I do it manuallly
 		//_coef_table_header, rclass
-<<<<<<< HEAD
 		
 		_prefix_legend ritest, rclass `verbose'
 		di as txt %`s(col1)'s "res. var(s)" ":  `r(resampvar)'"
@@ -873,18 +825,6 @@ program rit_DisplayResults, rclass
 		}
 		else {
 			di as txt %`s(col1)'s "Resampling" as text proper(":  `sampling_method'")
-=======
-		_prefix_legend ritest, rclass `verbose'
-		di as txt %`s(col1)'s "res. var(s)" ":  `r(resampvar)'"
-		
-		if !missing(r(N_clust)) & "`r(clustvar)'" != "" {
-			di as txt %`s(col1)'s "Clust. var(s)" as res ":  `r(clustvar)'"
-			di as txt %`s(col1)'s "Clusters" as res ":  `r(N_clust)'"
-		}
-		if !missing(r(N_strata)) & "`r(strata)'" != "" {
-			di as txt %`s(col1)'s "Strata var(s)" as res ":  `r(strata)'"
-			di as txt %`s(col1)'s "Strata" as res ":  `r(N_strata)'"
->>>>>>> origin/master
 		}
 		
 	}
