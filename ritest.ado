@@ -1,4 +1,5 @@
-*! version 1.0.0  21mar2017 based on permute.ado (version 2.7.3  16feb2015).
+*! version 1.0.1  15may2017 based on permute.ado (version 2.7.3  16feb2015).
+***** next revision, rename all "sampling" "resampling" to "[re]randomization"
 
 cap program drop ritest
 cap program drop RItest
@@ -334,7 +335,7 @@ program RItest, rclass
             local method program
 			cap program list `samplingprogram'
 			if _rc!=0 {
-				di as err "resampling proceedure (`samplingprogram') does not exists"
+				di as err "proceedure -`samplingprogram'- does not exists"
 				exit 198
 			}
 	}
