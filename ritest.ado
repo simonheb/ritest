@@ -1,6 +1,8 @@
 *! version 1.0.1  15may2017 based on permute.ado (version 2.7.3  16feb2015).
 ***** next revision, rename all "sampling" "resampling" to "[re]randomization"
 * this might also include "resampvar"
+**Changelog
+*1.0.1 now can be called with the option RANDOMIZATIONProgram OR SAMPLINGprogram
 
 cap program drop ritest
 cap program drop RItest
