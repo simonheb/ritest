@@ -1,7 +1,8 @@
-*! version 1.0.1  15may2017 based on permute.ado (version 2.7.3  16feb2015).
+*! version 1.0.2  15sep2017 based on permute.ado (version 2.7.3  16feb2015).
 ***** next revision, rename all "sampling" "resampling" to "[re]randomization"
 * this might also include "resampvar"
-**Changelog
+***** Changelog
+*1.0.2 "if" and  "in" for the subcommand will now be considered irrespective of "drop" or "nodrop" are specified 
 *1.0.1 now can be called with the option RANDOMIZATIONProgram OR SAMPLINGprogram
 
 cap program drop ritest
@@ -57,7 +58,6 @@ program RItest, rclass
 		id="expression list" equalok)		///
 		[fw iw pw aw] [if] [in] [,		///
 			FORCE				///
-			noDROP				///
 			Level(passthru)			///
 			*				/// other options
 		]
@@ -76,7 +76,6 @@ program RItest, rclass
 		local 0 `s(wgt)'
 		syntax [, NONOPTION ]
 	}
-
 	local version	`"`s(version)'"'
 	local cmdname	`"`s(cmdname)'"'
 	local cmdargs	`"`s(anything)'"'
@@ -87,22 +86,8 @@ program RItest, rclass
 	local rest	`"`s(rest)'"'
 	local efopt	`"`s(efopt)'"'
 	local level	`"`s(level)'"'
+	local command	`"`s(command)'"'
 	// command initially executed using entire dataset
-	local xcommand	`"`s(command)'"'
-	if "`drop'" != "" {
-		// command with [if] [in]
-		local command	`"`s(command)'"'
-	}
-	else {
-		// command without [if] [in]
-		local command	`"`cmdname' `cmdargs' `wgt'"'
-		if `"`cmdopts'"' != "" {
-			local command `"`:list retok command', `cmdopts'`rest'"'
-		}
-		else	local command `"`:list retok command'`rest'"'
-		local cmdif	`"`s(if)'"'
-		local cmdin	`"`s(in)'"'
-	}
 	
 	//now check the options
 	local 0 `", `options'"'
@@ -225,6 +210,10 @@ program RItest, rclass
 	local eexplist	`"`s(eexplist)'"'
 
 	_prefix_note `cmdname', `nodots'
+
+	di as inp `". `command'"'
+
+	
 	if "`noisily'" != "" {
 		di "ritest: First call to `cmdname' with data as is:" _n
 	
@@ -450,7 +439,7 @@ program RItest, rclass
 		
 		// analyze permuted data
 		`noi' di as inp `". `command'"'
-		capture `noiqui' `noisily'  `command'
+		capture `noiqui' `noisily' `command'
 		if (c(rc) == 1) error 1
 		local bad = c(rc) != 0
 		if c(rc) {
