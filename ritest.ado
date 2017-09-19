@@ -124,36 +124,38 @@ program RItest, rclass
 	]
 	_get_diopts diopts, `options' //this makes sure no false options are passed
 
-	***AT version 1.0.1 I switched from calling things "Sampling*" to calling them "Randomization*". The following is to create backwardscompatibility and to make sure the code doesnt need to be changed
+	//AT version 1.0.3 I will switch from calling things "Sampling*" to calling them "Randomization*".
+	//The following is to create backwardscompatibility and to make sure the code doesnt need to be changed
+	//as long as the errs are commented out, the different options are just synonyms
 	if ("`saveresampling'"=="") {
 		local saveresampling  `saverandomization'
 	} 
 	else {
-		di as err "You're using deprecated syntax -saveresampling-, please use -saverandomization- instead"
+		//di as err "You're using deprecated syntax -saveresampling-, please use -saverandomization- instead"
 	}
 	if ("`samplingsourcefile'"=="") {
 		local samplingsourcefile  `randomizationsourcefile'
 	}
 	else {
-		di as err "You're using deprecated syntax -samplingsourcefile-, please use -randomizationsourcefile- instead"
+		//di as err "You're using deprecated syntax -samplingsourcefile-, please use -randomizationsourcefile- instead"
 	}
 	if ("`samplingmatchvar'"=="") {
 		local samplingmatchvar `randomizationmatchvar'
 	}
 	else {
-		di as err "You're using deprecated syntax -samplingmatchvar-, please use -randomizationmatchvar- instead"
+		//di as err "You're using deprecated syntax -samplingmatchvar-, please use -randomizationmatchvar- instead"
 	}
 	if ("`samplingprogram'"=="") {
 		local samplingprogram  `randomizationprogram'
 	}
 	else {
-		di as err "You're using deprecated syntax -samplingprogram-, please use -randomizationprogram- instead"
+		//di as err "You're using deprecated syntax -samplingprogram-, please use -randomizationprogram- instead"
 	}
 	if ("`samplingprogramoptions'"=="") {
 		local samplingprogramoptions  `randomizationprogramoptions'
 	}
 	else {
-		di as err "You're using deprecated syntax -samplingprogramoptions-, please use -randomizationprogramoptions- instead"
+		//di as err "You're using deprecated syntax -samplingprogramoptions-, please use -randomizationprogramoptions- instead"
 	}
 	
 	if (("`strata'" != "" | "`cluster'" !=  "") + ("`samplingsourcefile'" != "" | "`samplingmatchvar'" !=  "")  + ("`samplingprogram'" != "" | "`samplingprogramoptions'" !=  "") )>1    {
