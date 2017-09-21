@@ -299,10 +299,10 @@ effect based on a regression controlling for age. {p_end}
 {title:Author and acknowledgments}
 
 {pstd}
-Simon Heß, Goethe University Frankfurt.){p_end}
+Simon Heß, Goethe University Frankfurt.{p_end}
 
 {pstd}
-The latest version of ritest can always be obtained from {browse "https://github.com/simonheb/ritest"} or {browse "http://HessS.org"}. I am happy to receive comments and suggestions regarding bugs or possibilites for improvements/extensions via {browse "https://github.com/simonheb/ritest/issues"}.{p_end}
+The latest version of ritest can always be obtained from {browse "https://github.com/simonheb/ritest"} or {browse "http://HessS.org"}. I am happy to receive comments and suggestions regarding bugs or possibilites for improvements/extensions via {browse "https://github.com/simonheb/ritest/issues"}.
 {p_end}
 
 {pstd}
