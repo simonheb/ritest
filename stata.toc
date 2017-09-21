@@ -1,3 +1,3 @@
 v 1.0.3
 d Simon H. Heﬂ, Goethe University Frankfurt, Germany
-p riest Randomization inference with Stata: A guide and software
+p ritest Randomization inference with Stata
