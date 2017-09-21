@@ -1,4 +1,4 @@
-*! version 1.0.2  15sep2017 based on permute.ado (version 2.7.3  16feb2015).
+*! version 1.0.3  15sep2017 based on permute.ado (version 2.7.3  16feb2015).
 ***** next revision, rename all "sampling" "resampling" to "[re]randomization"
 * this might also include "resampvar"
 ***** Changelog
