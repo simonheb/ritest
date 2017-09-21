@@ -1,5 +1,5 @@
 v 1.0.3
-d ritest. Randomization inference with Stata
+d ritest - Randomization inference with Stata
 d Simon H. Heß, Goethe University Frankfurt, Germany
 f ritest.ado
 f ritest.sthlp
