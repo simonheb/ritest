@@ -422,6 +422,9 @@ program RItest, rclass
 	}
 	local rejected 0
 	forvalues i = 1/`reps' {
+		//for debugging: display seed
+		//noi noi noi di as err substr(c(rngstate), 4996,.)
+
 		cap `samplingprogram', run(`i') resampvar(`resampvar') `samplingprogramoptions'
 		if _rc!=0 {
 			di as err "Failed while calling resampling proceedure. Call was: " _n "{stata `samplingprogram', run(`i') resampvar(`resampvar') `samplingprogramoptions'}" _n as text "Error was: " 
@@ -551,19 +554,25 @@ program permute_simple
 		//mark first obs in each cluster
 		sort `strata' `cluster', stable
 		by `strata' `cluster': gen `ind' = 1 if _n==1
-		sum `ind'
-		if r(N)==_N { //this means that all clusters are of size 1
-			sort `resampvar' //this is to shuffle all ovs
+		//check whether we have groups/clusters
+	/* the following bit of code might have become obsolte with the last update: double check in the next iterationg if
+		permute_simple works as intendet for all variants of clustered, stratified and complete randomization*/
+		sum `ind', meanonly
+		if r(N)==_N { //this means that all clusters are of size 1 
+			sort `rorder', stable //this brings observations into an order that is not strata-cluster,
+			//for other casses, this is achieved through sort `strata' `ind' `rorder' below.
+			replace `rorder'=runiform()
 		}
-		//across all first observations, generate a count variable
+		
+		//across all first observations within clusters, save their position
 		sort `strata' `ind', stable
 		by `strata' `ind': gen `nn'=_n if `ind'!=.
-		//now, reshuffle and across all first observations, take the treatment status from the observation which was at this position before
+		//now, reshuffle, and across all first observations take the treatment status from the observation which was at this position before
 		sort `strata' `ind' `rorder', stable
 		by `strata' `ind': gen `newt'=`resampvar'[`nn']
 		//place the first observations on top of each cluster
 		sort `strata' `cluster' `ind', stable
-		//copy down the treatment status
+		//copy down the treatment status to all observations in the same cluster
 		by `strata' `cluster': replace `newt'=`newt'[_n-1] if missing(`newt')
 		drop `resampvar'  `nn' `ind' `rorder'
 		rename `newt' `resampvar' 
@@ -571,7 +580,7 @@ program permute_simple
 end
 program permute_extfile
     syntax ,file(string) matchvars(varlist) run(integer) resampvar(varlist)
-    sort `matchvars'
+    sort `matchvars', stable
     cap isid `matchvars'
     if c(rc) {
         capture qui merge m:1 `matchvars' using `file', keepusing(`resampvar'`run') nogen 
