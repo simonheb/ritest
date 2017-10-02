@@ -8,8 +8,8 @@ To obtain the latest version through github, from the main window in Stata, run:
 >  net describe ritest, from(https://raw.githubusercontent.com/simonheb/ritest/master/)
 
 If the download from within Stata fails (e.g. because you are behind a firewall),you can always download the files directly: 
->  https://raw.githubusercontent.com/simonheb/ritest/master/ritest.ado
->  https://raw.githubusercontent.com/simonheb/ritest/master/ritest.sthlp
+ - https://raw.githubusercontent.com/simonheb/ritest/master/ritest.ado
+ - https://raw.githubusercontent.com/simonheb/ritest/master/ritest.sthlp
 
 ## Bugs
 There are no known bugs. The number of people who have used the code until now is small though, so please report any unintend or surprising behaviour. 
