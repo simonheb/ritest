@@ -5,8 +5,9 @@ The first version was published alongside an [article in the Stata Journal](http
 
 ## Installation
 To obtain the latest version through github, from the main window in Stata, run:
->  net describe ritest, from(https://raw.githubusercontent.com/simonheb/ritest/master/)
-
+```
+net describe ritest, from(https://raw.githubusercontent.com/simonheb/ritest/master/)
+```
 If the download from within Stata fails (e.g. because you are behind a firewall),you can always download the files directly: 
  - https://raw.githubusercontent.com/simonheb/ritest/master/ritest.ado
  - https://raw.githubusercontent.com/simonheb/ritest/master/ritest.sthlp
