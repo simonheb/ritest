@@ -16,9 +16,9 @@ If the download from within Stata fails (e.g. because you are behind a firewall)
 There are no known bugs. The number of people who have used the code until now is small though, so please report any unintend or surprising behaviour. 
 
 ## Changelog
- - **1.0.5** Jason Kerwin pointed out that string strata-ids were ignored. This is fixed with this version. Also I sped execution time by dropping useless code.
- - **1.0.4** David McKenzie pointed out that under some conditions, the random-seed was ignored. This is fixed with this version
- - **1.0.3** Was published in Stata Journal
+ - **1.0.5** Jason Kerwin pointed out that when string variables were used as strata ids, these were ignored. This is fixed with this version. Also I sped execution time by dropping useless code.
+ - **1.0.4** David McKenzie pointed out that under some conditions, the random seed was ignored. This is fixed with this version.
+ - **1.0.3** is the version that was published in the Stata Journal.
 
 ## Mentions
  - [Finally, a way to do easy randomization inference in Stata!](http://blogs.worldbank.org/impactevaluations/finally-way-do-easy-randomization-inference-stata) (blog post by David McKenzie)
