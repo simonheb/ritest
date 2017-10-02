@@ -1,7 +1,9 @@
-*! version 1.0.3  15sep2017 based on permute.ado (version 2.7.3  16feb2015).
-***** next revision, rename all "sampling" "resampling" to "[re]randomization"
-* this might also include "resampvar"
+*! version 1.0.5  02oct2017 based on permute.ado (version 2.7.3  16feb2015).
 ***** Changelog
+*1.0.5 sped up the execution time for the permutation commmand by dropping unneeded parts
+*1.0.5 made sure that string strata-identifiers are also treated well.
+*1.0.4 fixed the missing ",stable" for a sort in permute_simple, as suggested by david mckenzie.
+*1.0.3 hide the warnings introduced with 1.0.1, as requested by stata jounral 
 *1.0.2 "if" and  "in" for the subcommand will now be considered irrespective of "drop" or "nodrop" are specified 
 *1.0.1 now can be called with the option RANDOMIZATIONProgram OR SAMPLINGprogram
 
@@ -319,7 +321,7 @@ program RItest, rclass
 		}
 		tempvar sflag touse
 		mark `touse'
-		markout `touse' `strata'
+		markout `touse' `strata', strok
 		sort `touse' `strata', stable
 		by `touse' `strata': gen `sflag' = _n==1 if `touse'
 		qui replace `sflag' = sum(`sflag')
@@ -551,29 +553,24 @@ program permute_simple
 	//create a random variable
     gen `rorder'=runiform()
     qui {
-		//mark first obs in each cluster
+		//mark first obs in each cluster, for those i will perform the permutations
 		sort `strata' `cluster', stable
 		by `strata' `cluster': gen `ind' = 1 if _n==1
-		//check whether we have groups/clusters
-	/* the following bit of code might have become obsolte with the last update: double check in the next iterationg if
-		permute_simple works as intendet for all variants of clustered, stratified and complete randomization*/
-		sum `ind', meanonly
-		if r(N)==_N { //this means that all clusters are of size 1 
-			sort `rorder', stable //this brings observations into an order that is not strata-cluster,
-			//for other casses, this is achieved through sort `strata' `ind' `rorder' below.
-			replace `rorder'=runiform()
-		}
 		
-		//across all first observations within clusters, save their position
+		//across all first observations within clusters, save their position in the data set
 		sort `strata' `ind', stable
 		by `strata' `ind': gen `nn'=_n if `ind'!=.
-		//now, reshuffle, and across all first observations take the treatment status from the observation which was at this position before
+		
+		//now, reshuffle these first observations within strata, take the treatment status from the observation which was at this position before
 		sort `strata' `ind' `rorder', stable
 		by `strata' `ind': gen `newt'=`resampvar'[`nn']
+
 		//place the first observations on top of each cluster
+		//copy the treatment status to all observations in the same cluster
 		sort `strata' `cluster' `ind', stable
-		//copy down the treatment status to all observations in the same cluster
 		by `strata' `cluster': replace `newt'=`newt'[_n-1] if missing(`newt')
+
+		//clean up
 		drop `resampvar'  `nn' `ind' `rorder'
 		rename `newt' `resampvar' 
     }
