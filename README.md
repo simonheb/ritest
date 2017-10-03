@@ -15,6 +15,8 @@ If the download from within Stata fails (e.g. because you are behind a firewall)
 ## Citation
 Heß, Simon. "Randomization inference with Stata: A guide and software" *Stata Journal* 17.3: pp. 630-651.
 
+[BibTeX](https://raw.githubusercontent.com/simonheb/ritest/master/ritest.sthlp)
+
 ## Bugs
 There are no known bugs. The number of people who have used the code until now is small though, so please report any unintend or surprising behaviour. 
 
