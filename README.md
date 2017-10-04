@@ -13,7 +13,7 @@ If the download from within Stata fails (e.g. because you are behind a firewall)
  - https://raw.githubusercontent.com/simonheb/ritest/master/ritest.sthlp
 
 ## Citation
-Heß, Simon. "Randomization inference with Stata: A guide and software" *Stata Journal* 17.3: pp. 630-651.
+Heß, Simon. "Randomization inference with Stata: A guide and software" *Stata Journal* 17(3) pp. 630-651.
 
 [BibTeX](https://raw.githubusercontent.com/simonheb/ritest/master/ritest.bib)
 
