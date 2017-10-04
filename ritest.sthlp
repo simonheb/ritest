@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.3  15sep2017}{...}
+{* *! version 1.0.5  4oct2017}{...}
 {vieweralsosee "[R] simulate" "help permute"}{...}
 {vieweralsosee "[R] bootstrap" "help bootstrap"}{...}
 {vieweralsosee "[R] jackknife" "help jackknife"}{...}
@@ -20,7 +20,7 @@
 {title:Syntax}
 
 {pstd}
-Compute p values for Monte Carlo permutation tests, allowing for arbitrary randomization procedures
+Compute p values for permutation tests, allowing for arbitrary randomization procedures
 
 {p 8 16 2}
 {cmd:ritest}
@@ -295,6 +295,15 @@ effect based on a regression controlling for age. {p_end}
 {help simulate},
 {help bootstrap},
 {help jackknife}
+
+{title:Citation}
+
+{pstd}
+Heß, Simon H., "Randomization inference with Stata: A guide and software" {it:Stata Journal} 17(3) pp. 630-651.
+{p_end}
+{pstd}
+{browse "https://raw.githubusercontent.com/simonheb/ritest/master/ritest.bib":BibTeX-file}.
+{p_end}
 
 {title:Author and acknowledgments}
 
