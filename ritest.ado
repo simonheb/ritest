@@ -1,6 +1,7 @@
-*! version 1.0.5  02oct2017 based on permute.ado (version 2.7.3  16feb2015).
+*! version 1.0.6  5oct2017 based on permute.ado (version 2.7.3  16feb2015).
 ***** Changelog
-*1.0.5 sped up the execution time for the permutation commmand by dropping unneeded parts
+*1.0.6 fixed an error message that appeared when the "saveresampling()" option was used. h/t Jason Kerwin
+*1.0.5 sped up the execution time for the permutation commmand (permute_simple) by dropping unneeded parts
 *1.0.5 made sure that string strata-identifiers are also treated well.
 *1.0.4 fixed the missing ",stable" for a sort in permute_simple, as suggested by david mckenzie.
 *1.0.3 hide the warnings introduced with 1.0.1, as requested by stata jounral 
@@ -433,13 +434,13 @@ program RItest, rclass
 			error _rc
 		}	
      	if "`saveresampling'"!="" {
-			qui 	 `preservetemp',replace
+			qui save `preservetemp',replace
 			rename `resampvar' `resampvar'`i'
-			cap qui merge 1:1 `originalorder' using `"`saveresampling'"', gen(_m`i')
+			cap qui merge 1:1 `originalorder' using `"`saveresampling'"', nogen
 			rename `originalorder' keep`originalorder'
 			drop __*
 			rename keep`originalorder' `originalorder'
-			cap order `resampvar'* _m*, last
+			cap order `resampvar'* , last
 			qui save `"`saveresampling'"', replace
 			use `preservetemp', clear
 		}
