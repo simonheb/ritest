@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.6  5oct2017}{...}
+{* *! version 1.0.7  29oct2017}{...}
 {vieweralsosee "[R] simulate" "help permute"}{...}
 {vieweralsosee "[R] bootstrap" "help bootstrap"}{...}
 {vieweralsosee "[R] jackknife" "help jackknife"}{...}

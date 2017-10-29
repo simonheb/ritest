@@ -1,8 +1,9 @@
-*! version 1.0.6  5oct2017 based on permute.ado (version 2.7.3  16feb2015).
+*! version 1.0.7  29oct2017 based on permute.ado (version 2.7.3  16feb2015).
 ***** Changelog
+*1.0.7 made sure that string cluster-identifiers are also treated correctly.
 *1.0.6 fixed an error message that appeared when the "saveresampling()" option was used. h/t Jason Kerwin
 *1.0.5 sped up the execution time for the permutation commmand (permute_simple) by dropping unneeded parts
-*1.0.5 made sure that string strata-identifiers are also treated well.
+*1.0.5 made sure that string strata-identifiers are also treated correctly.
 *1.0.4 fixed the missing ",stable" for a sort in permute_simple, as suggested by david mckenzie.
 *1.0.3 hide the warnings introduced with 1.0.1, as requested by stata jounral 
 *1.0.2 "if" and  "in" for the subcommand will now be considered irrespective of "drop" or "nodrop" are specified 
@@ -343,7 +344,7 @@ program RItest, rclass
 		}
 		tempvar cflag touse
 		mark `touse'
-		markout `touse' `strata' `cluster'  
+		markout `touse' `strata' `cluster'  , strok
 		sort  `touse' `strata' `cluster' , stable
 		by `touse' `strata' `cluster': gen `cflag' = _n==1 if `touse'
 		qui replace `cflag' = sum(`cflag')

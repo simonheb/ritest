@@ -1,4 +1,4 @@
-# ritest
+﻿# ritest
 Stata package to perform randomization inference on any stata command.
 
 The first version was published alongside an [article in the Stata Journal](http://www.stata-journal.com/article.html?article=st0489). I provide provide regular updates through GitHub.
@@ -21,8 +21,8 @@ Heß, Simon H., "Randomization inference with Stata: A guide and software" *Stat
 There are no known bugs. The number of people who have used the code until now is small though, so please report any unintend or surprising behaviour. 
 
 ## Changelog
+ - **1.0.7** Jason Kerwin pointed out that when string variables were used as strata or cluster ids, all observations were treated as belonging to the same. This is fixed with this version. Also I sped execution time by dropping useless code.
  - **1.0.6** Jason Kerwin pointed out an issue with the "saveresampling()"-option. This version fixes this.
- - **1.0.5** Jason Kerwin pointed out that when string variables were used as strata ids, these were ignored. This is fixed with this version. Also I sped execution time by dropping useless code.
  - **1.0.4** David McKenzie pointed out that under some conditions, the random seed was ignored. This is fixed with this version.
  - **1.0.3** is the version that was published in the Stata Journal.
 
