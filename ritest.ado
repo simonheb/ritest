@@ -91,12 +91,12 @@ program RItest, rclass
 	local efopt	`"`s(efopt)'"'
 	local level	`"`s(level)'"'
 	local command	`"`s(command)'"'
-	// command initially executed using entire dataset
 	
 	//now check the options
 	local 0 `", `options'"'
 	syntax  [,			///
 		noDOTS			///
+		lessdots		/// not documented, only displays 1/10 dots
 		Reps(integer 100)	///
 		SAving(string)		///  
 		SAVEResampling(string)		///  save resampvar for every round
@@ -217,16 +217,14 @@ program RItest, rclass
 
 	_prefix_note `cmdname', `nodots'
 
-	di as inp `". `command'"'
+	`noi' di as inp `". `command'"'
 
-	
 	if "`noisily'" != "" {
 		di "ritest: First call to `cmdname' with data as is:" _n
-	
 	}
      
 	// run the command using the entire dataset (for output)
-	`command'
+	`noi' `command'
 
 	preserve
 	if ("`null'"!="") {
@@ -422,7 +420,7 @@ program RItest, rclass
 	// do permutations
 	if "`nodots'" == "" | "`noisily'" != "" {
 		di
-		_dots 0, title(Resampling replications) reps(`reps') `nodots'
+		`dots' 0, title(Resampling replications) reps(`reps') `nodots'
 	}
 	local rejected 0
 	forvalues i = 1/`reps' {
@@ -473,7 +471,17 @@ program RItest, rclass
 				post `postnam' `xstats'
 //			}
 		}
-		`dots' `i' `bad'
+		if "`lessdots'"=="" {
+			`dots' `i' `bad'
+		} 
+		else if mod(`i',10)==0 {
+			if mod(`i',500)==0 {
+				`dots' `i' `bad'
+			}
+			else {
+				`dots' `: di `i'+1' `bad'
+			}
+		}
 	}
 	`dots' `reps'
 
