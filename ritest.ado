@@ -479,7 +479,7 @@ program RItest, rclass
 				`dots' `i' `bad'
 			}
 			else {
-				`dots' `: di `i'+1' `bad'
+				`dots' 4 `bad'
 			}
 		}
 	}
