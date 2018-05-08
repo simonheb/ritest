@@ -61,6 +61,7 @@ Compute p values for permutation tests, allowing for arbitrary randomization pro
 {synopt :{opt null(outcome value)}}specify a null hypothesis of treatment effect {it:value} or {it:varname}  for outcome {it:outcome} {p_end}
 {synopt :{opt kdens:ityplot}}plot the densities of each statistic in {it:exp_list}{p_end}
 {synopt :{opt kdenstyo:options(string)}}additional options to be passed on to {it:kdensity} {p_end}
+{synopt :{opt sav:ing(filename)}} save a data set of estimates from the permutations{p_end}
 {synopt :{opt saver:esampling(filename)}}save all permutations of {it:resampvar} in a file called {it:filename} for later inspection.{p_end}
 {synopt :{opt noanal:ytics}}do not send anonymized usage statistics to google analytics{p_end}
 {synopt :{opt seed(#)}}set random-number seed to #{p_end}
