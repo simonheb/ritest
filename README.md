@@ -26,6 +26,9 @@ There are no known bugs. The number of people who have used the code until now i
  - **1.0.4** David McKenzie pointed out that under some conditions, the random seed was ignored. This is fixed with this version.
  - **1.0.3** is the version that was published in the Stata Journal.
 
-## Mentions
+## Media Coverage
  - [Finally, a way to do easy randomization inference in Stata!](http://blogs.worldbank.org/impactevaluations/finally-way-do-easy-randomization-inference-stata) (blog post by David McKenzie)
  - [Simon Heß has a brand-new Stata package for randomization inference](https://jasonkerwin.com/nonparibus/2017/09/27/simon-hes-brand-new-stata-package-randomization-inference/) (blog post by Jason Kerwin)
+
+## Disclaimer of Warranties and Limitation of Liability
+Use at own risk. You agree that use of this software is at your own risk. The author is optimistic but does not make any warranty as to the results that may be obtained from use of this software. I would be very happy though to hear about any issues you might find and will be transparent about changes I make in response to user inquiries.
