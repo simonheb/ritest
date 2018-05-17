@@ -31,4 +31,4 @@ There are no known bugs. The number of people who have used the code until now i
  - [Simon Heß has a brand-new Stata package for randomization inference](https://jasonkerwin.com/nonparibus/2017/09/27/simon-hes-brand-new-stata-package-randomization-inference/) (blog post by Jason Kerwin)
 
 ## Disclaimer of Warranties and Limitation of Liability
-Use at own risk. You agree that use of this software is at your own risk. The author is optimistic but does not make any warranty as to the results that may be obtained from use of this software. I would be very happy though to hear about any issues you might find and will be transparent about changes I make in response to user inquiries.
+Use at own risk. You agree that use of this software is at your own risk. The author is optimistic but does not make any warranty as to the results that may be obtained from use of this software. The author would be very happy to hear about any issues you might find and will be transparent about changes made in response to user inquiries.
