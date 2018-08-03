@@ -1,5 +1,6 @@
 *! version 1.0.7  29oct2017 based on permute.ado (version 2.7.3  16feb2015).
 ***** Changelog
+*1.0.8 fixed (removed `') the "replace" option for the postfile statement as it was causing trouble when running ritest in wine and also I deactivated google analytics tracking
 *1.0.7 made sure that string cluster-identifiers are also treated correctly.
 *1.0.6 fixed an error message that appeared when the "saveresampling()" option was used. h/t Jason Kerwin
 *1.0.5 sped up the execution time for the permutation commmand (permute_simple) by dropping unneeded parts
@@ -91,6 +92,7 @@ program RItest, rclass
 	local efopt	`"`s(efopt)'"'
 	local level	`"`s(level)'"'
 	local command	`"`s(command)'"'
+	
 	
 	//now check the options
 	local 0 `", `options'"'
@@ -217,6 +219,7 @@ program RItest, rclass
 
 	_prefix_note `cmdname', `nodots'
 
+	
 	`noi' di as inp `". `command'"'
 
 	if "`noisily'" != "" {
@@ -375,7 +378,9 @@ program RItest, rclass
 	else {
             local method permute
     }
+	
 
+	
 	if `eps' < 0 {
 		di as err "eps() must be greater than or equal to zero"
 		exit 198
@@ -388,13 +393,16 @@ program RItest, rclass
 		local stats `stats' (`b'[1,`j'])
 		local xstats `xstats' (`x`j'')
 	}
-
+	
+	
 	// prepare post
 	tempname postnam
 	postfile `postnam' `names' using `"`saving'"', ///
-		`double' `every' `replace'
+		`double' `every' replace
 	post `postnam' `stats'
 
+
+	
 	//methods such as "external file" or "automatic permuations" are wrapped in the third one
 	if "`method'"=="permute" {
 		local samplingprogram permute_simple
@@ -405,13 +413,10 @@ program RItest, rclass
 		local samplingprogramoptions `"file("`samplingsourcefile'")      matchvars(`samplingmatchvar')"'
     }
 	
-	if ("`noanalytics'"=="") 	{ //This is the GOOGLE-ANALYTICS bit
-		set timeout1 1 //make sure this doesnt cause the code to halt for longer periods
-		set timeout2 1
-		tempfile foo
-		cap copy "https://www.google-analytics.com/collect?payload_data&z=`:di round(runiform()*1000)'&v=1&tid=UA-65758570-2&cid=5555&t=pageview&dp=`method'&dt=Stata`di:  version'-$S_OS-$S_OSDTL&el=plain`kdensityplot'" `foo', replace
-		set timeout1 30
-		set timeout2 180
+	if ("`noanalytics'"=="") 	{ //This was the GOOGLE-ANALYTICS bit
+	}
+	else {
+		di as err "you specified noanalytics option. The google analytics tracking has been removed from the code permantly"
 	}
 	if "`dots'" == "*" {
 		local noiqui noisily quietly
@@ -419,7 +424,6 @@ program RItest, rclass
 
 	// do permutations
 	if "`nodots'" == "" | "`noisily'" != "" {
-		di
 		`dots' 0, title(Resampling replications) reps(`reps') `nodots'
 	}
 	local rejected 0
@@ -433,7 +437,7 @@ program RItest, rclass
 			error _rc
 		}	
      	if "`saveresampling'"!="" {
-			qui save `preservetemp',replace
+			qui save `"`preservetemp'"',replace
 			rename `resampvar' `resampvar'`i'
 			cap qui merge 1:1 `originalorder' using `"`saveresampling'"', nogen
 			rename `originalorder' keep`originalorder'
@@ -441,7 +445,7 @@ program RItest, rclass
 			rename keep`originalorder' `originalorder'
 			cap order `resampvar'* , last
 			qui save `"`saveresampling'"', replace
-			use `preservetemp', clear
+			use `"`preservetemp'"', clear
 		}
 		
 		// analyze permuted data
@@ -502,7 +506,7 @@ program RItest, rclass
 		collapse uh,by(_*)
 		drop uh
 	}	
-	
+
 	label data `"ritest `resampvar' : `cmdname'"'
 	// save permute characteristics and labels to data set
 	forvalues i = 1/`K' {
