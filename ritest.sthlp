@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.7  29oct2017}{...}
+{* *! version 1.0.8  sep2018}{...}
 {vieweralsosee "[R] simulate" "help permute"}{...}
 {vieweralsosee "[R] bootstrap" "help bootstrap"}{...}
 {vieweralsosee "[R] jackknife" "help jackknife"}{...}
@@ -65,7 +65,8 @@ Compute p values for permutation tests, allowing for arbitrary randomization pro
 {synopt :{opt saver:esampling(filename)}}save all permutations of {it:resampvar} in a file called {it:filename} for later inspection.{p_end}
 {synopt :{opt noanal:ytics}}do not send anonymized usage statistics to google analytics{p_end}
 {synopt :{opt seed(#)}}set random-number seed to #{p_end}
-{synopt :{opt eps}}numerical tolerance; seldom used{p_end}
+{synopt :{opt eps(#)}}numerical tolerance; seldom used, default 1e-7{p_end}
+{synopt :{opt strict}}computes the strict version of the test. p=c/N, with c = #{c -(}|T| > |T(obs)|{c )-}{p_end}
 {synopt :{opt force}}force  {cmd: ritest} to accept weights in {it:command} {p_end}
 {synoptline}
 {p2colreset}
@@ -202,20 +203,21 @@ be deducted from the variable {it:outcome} before conducting the randomization
 test.
 
 {phang}
+{opt eps(#)} defines the numeric tolerance of the test. To account for numeric
+imprecisions, the p-value is computed as c/N, with c = #{c -(}|T|>=|T(obs)|-eps{c )-}.
+Default is eps(1e-7).
+
+{phang}
+{opt strict} computes the strict version of the test. By default the p-value is
+computed based on c = #{c -(}|T| >= |T(obs)|{c )-}. When multiple re-samplings
+result in the same realization of T, this proceedure yields conservative p-value.
+The strict version is based on c = #{c -(}|T| > |T(obs)|{c )-} and is weakly
+overconfident. Requires eps(0).
+
+{phang}
 {opt kdensityplot} produces a density plot of the realizations of expressions in
 {it:exp_list}. The realization for the expression in the original data is drawn
 as a vertical line.
-
-{phang}
-{opt noanalytics} suppresses the sending of anonymous usage statistics. If this 
-is not specified and the computer is connected to the internet, ritest will send
-a beacon to the author's google analytics account, containing information on (i)
-the version of Stata, (ii) the version of ritest, (iii) the operating system, and (iv) 
-whether program-based, file-based, or automatic permutation was used. No information on 
-the command used, the data used, or any other information regarding the user or the data
-analysis is recorded. If you want to confirm that no other information is being sent,
-search the .ado-file for "GOOGLE-ANALYTICS" to find the part of the code related to this.
-
 
 {marker examples}{...}
 {title:Examples}
