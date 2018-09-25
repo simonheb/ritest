@@ -21,6 +21,8 @@ Heß, Simon H., "Randomization inference with Stata: A guide and software" *Stat
 There are no known bugs. The number of people who have used the code until now is small though, so please report any unintend or surprising behaviour. 
 
 ## Changelog
+ - **1.0.9** added the strict and the eps option to the helpfile and added parameter-checks so that "strict" enforces "eps(0)". h/t Katharina Nesselrode
+ - **1.0.8** minor bugfix and I got rid of the google analytics part
  - **1.0.7** Jason Kerwin pointed out that when string variables were used as strata or cluster ids, all observations were treated as belonging to the same. This is fixed with this version. Also I sped up execution time by dropping unneeded code.
  - **1.0.6** Jason Kerwin pointed out an issue with the "saveresampling()"-option. This version fixes this.
  - **1.0.4** David McKenzie pointed out that under some conditions, the random seed was ignored. This is fixed with this version.
