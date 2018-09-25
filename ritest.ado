@@ -1,5 +1,6 @@
-*! version 1.0.7  29oct2017 based on permute.ado (version 2.7.3  16feb2015).
+*! version 1.0.9 sep2018.
 ***** Changelog
+*1.0.9 added the strict and the eps option to the helpfile and added parameter-checks so that "strict" enforces "eps(0)". h/t Katharina Nesselrode
 *1.0.8 fixed (removed `') the "replace" option for the postfile statement as it was causing trouble when running ritest in wine and also I deactivated google analytics tracking
 *1.0.7 made sure that string cluster-identifiers are also treated correctly.
 *1.0.6 fixed an error message that appeared when the "saveresampling()" option was used. h/t Jason Kerwin
@@ -93,7 +94,6 @@ program RItest, rclass
 	local level	`"`s(level)'"'
 	local command	`"`s(command)'"'
 	
-	
 	//now check the options
 	local 0 `", `options'"'
 	syntax  [,			///
@@ -122,7 +122,7 @@ program RItest, rclass
 		STRict			///
 		noHeader		///  not documented
 		noLegend		///  not documented
-		NOANALYtics		/// 
+		NOANALYtics		/// now obsolete
 		COLLApse		/// not documented an not recommendet
 		KDENSityplot	/// 
 		KDENSITYOptions(string)	///  not documented
@@ -219,7 +219,6 @@ program RItest, rclass
 
 	_prefix_note `cmdname', `nodots'
 
-	
 	`noi' di as inp `". `command'"'
 
 	if "`noisily'" != "" {
@@ -378,12 +377,16 @@ program RItest, rclass
 	else {
             local method permute
     }
-	
 
-	
 	if `eps' < 0 {
 		di as err "eps() must be greater than or equal to zero"
 		exit 198
+	}
+	if "`strict'"!="" {
+		if `eps' > 0 {
+			di as err "Warning: if the strict option is specified, eps must be set to 0 using -eps(0)"
+			exit 198
+		} 
 	}
 	
 	// temp variables for post
@@ -393,15 +396,14 @@ program RItest, rclass
 		local stats `stats' (`b'[1,`j'])
 		local xstats `xstats' (`x`j'')
 	}
-	
-	
+
 	// prepare post
 	tempname postnam
 	postfile `postnam' `names' using `"`saving'"', ///
 		`double' `every' replace
 	post `postnam' `stats'
 
-
+	
 	
 	//methods such as "external file" or "automatic permuations" are wrapped in the third one
 	if "`method'"=="permute" {
@@ -424,6 +426,7 @@ program RItest, rclass
 
 	// do permutations
 	if "`nodots'" == "" | "`noisily'" != "" {
+		di
 		`dots' 0, title(Resampling replications) reps(`reps') `nodots'
 	}
 	local rejected 0
@@ -506,7 +509,7 @@ program RItest, rclass
 		collapse uh,by(_*)
 		drop uh
 	}	
-
+	
 	label data `"ritest `resampvar' : `cmdname'"'
 	// save permute characteristics and labels to data set
 	forvalues i = 1/`K' {
@@ -727,7 +730,10 @@ program rit_GetResults, rclass
 	local rel `s(rel)'
 	local abs `s(abs)'
 	local minus `"`s(minus)'"'
-
+	
+	
+	
+	
 	tempvar diff //geqdiff
 	gen `diff' = 0
 	local K : word count `varlist'
@@ -750,6 +756,14 @@ program rit_GetResults, rclass
 `"estimates of observed statistic for `name' not found"'
 			exit 111
 		}
+		tempvar ties
+		gen `ties' = (`abs'(`name') == `abs'(`value')  )
+		qui sum `ties', meanonly
+		if `r(mean)'>0.01 {
+			noi noi di as err "Warning: `=round(100*r(mean))'% of the resampled realizations for `name' are exactly identical to original value"
+			
+		}
+		
 		quietly replace ///
 		`diff' = (`abs'(`name') `rel' `abs'(`value') `minus' `eps')
 		
