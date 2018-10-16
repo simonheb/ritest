@@ -1,3 +1,3 @@
-﻿v 1.0.9
-d Author: Simon H. Heß, Goethe University Frankfurt
+﻿v 1.1.0
+d Author: Simon Heß, Goethe University Frankfurt
 p ritest - Randomization inference with Stata
