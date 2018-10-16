@@ -326,15 +326,15 @@ program RItest, rclass
 	}
 	if `"`fixlevels'"' != "" {
 		tempvar fixedvalues_indicator
-		gen `fixedvalues_indicator'=.
+		qui gen `fixedvalues_indicator'=.
 		local ccc 0
 		foreach value of local fixlevels {
-			sum `resampvar'  if `resampvar'==`value'
+			qui sum `resampvar'  if `resampvar'==`value'
 			if r(N)==0 {
 				di as err "you specified to hold observations with `resampvar'==`value' fixed, but it seems there are no such observations"
 			}
 			else {
-				replace  `fixedvalues_indicator' = `ccc++' if `resampvar'==`value'
+				qui replace  `fixedvalues_indicator' = `ccc++' if `resampvar'==`value'
 			}
 		}
 	
@@ -433,7 +433,7 @@ program RItest, rclass
 
 	// prepare post
 	tempname postnam
-	postfile `postnam' `names' using `"`saving'"', ///
+	qui postfile `postnam' `names' using `"`saving'"', ///
 		`double' `every' replace
 	post `postnam' `stats'
 
