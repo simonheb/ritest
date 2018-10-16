@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.8  sep2018}{...}
+{* *! version 1.1.0 oct2018}{...}
 {vieweralsosee "[R] simulate" "help permute"}{...}
 {vieweralsosee "[R] bootstrap" "help bootstrap"}{...}
 {vieweralsosee "[R] jackknife" "help jackknife"}{...}
@@ -42,6 +42,7 @@ Compute p values for permutation tests, allowing for arbitrary randomization pro
 {syntab :Automatic resampling}
 {synopt :{opth str:ata(varlist)}}permute {it:resampvar} within strata{p_end}
 {synopt :{opth clu:ster(varlist)}}keep {it:resampvar} constant within clusters{p_end}
+{synopt :{opth fix:levels(list)}}keep {it:resampvar} fixed for all listed values{p_end}
 
 {syntab :File-based  resampling}
 {synopt :{opth samplings:ourcefile(filename)}}take permutations of {it:resampvar} from Stata data file {it:filename}, containing variables named {it:resampvar}1, resampvar2, resampvar3, ...{p_end}
@@ -155,12 +156,18 @@ p-values are computed; that is, Pr(|T*| {ul:>} |T|) is estimated.
 {dlgtab:Options}
 
 {phang}
-{opth strata(varlist)} specifies that the permutations be
+{opth strata(varlist)} specifies that the permutations have to be
 performed within each stratum defined by the values of {it:varlist}.
 
 {phang}
-{opth cluster(varlist)} specifies that the permutations be
+{opth cluster(varlist)} specifies that the permutations have to be
 performed treating each cluster as defined by {it:varlist} as one unit of assignment.
+
+{phang}
+{opth fixvalues(list)} specifies that the permutations have to be
+performed holding all observations fixed that have the specified values the resampling
+variable.
+This can be used for pairwise testing in experiments with more than two treatment arms.
 
 {phang}
 {opth samplingsourcefile(filename)} specifies that permutations of {it:resampvar} have to be taken from Stata data-file {it:filename}.

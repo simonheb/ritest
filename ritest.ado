@@ -1,5 +1,6 @@
-*! version 1.0.9 sep2018.
+*! version 1.1.0 oct2018.
 ***** Changelog
+*1.1.0 added a new option "fixlevels" to contstraint he rerandomization to certain levels of the treatment variable
 *1.0.9 added the strict and the eps option to the helpfile and added parameter-checks so that "strict" enforces "eps(0)". h/t Katharina Nesselrode
 *1.0.8 fixed (removed `') the "replace" option for the postfile statement as it was causing trouble when running ritest in wine and also I deactivated google analytics tracking
 *1.0.7 made sure that string cluster-identifiers are also treated correctly.
@@ -49,7 +50,7 @@ end
 
 program RItest, rclass
 	version 11
-	local ritestversion "0.0.5"
+	local ritestversion "1.0.9"
 	// get name of variable to permute
 	gettoken resampvar 0 : 0, parse(" ,:")
 	confirm variable `resampvar'
@@ -106,6 +107,7 @@ program RItest, rclass
 		DOUBle			/// not documented (handles double precision)
 		STRata(varlist)		///
 		CLUster(varlist)        ///
+		FIXlevels(string)        ///
 		SEED(string)		///
 		EPS(real 1e-7)		/// -Results- options
 		SAMPLINGSourcefile(string)          ///
@@ -164,20 +166,26 @@ program RItest, rclass
 		//di as err "You're using deprecated syntax -samplingprogramoptions-, please use -randomizationprogramoptions- instead"
 	}
 	
-	if (("`strata'" != "" | "`cluster'" !=  "") + ("`samplingsourcefile'" != "" | "`samplingmatchvar'" !=  "")  + ("`samplingprogram'" != "" | "`samplingprogramoptions'" !=  "") )>1    {
+	if (("`strata'" != "" | "`cluster'" !=  "" | `"`fixlevels'"' !=  "") + ("`samplingsourcefile'" != "" | "`samplingmatchvar'" !=  "")  + ("`samplingprogram'" != "" | "`samplingprogramoptions'" !=  "") )>1    {
 		di as err "Alternative sampling methods may not be combined."
 		exit 198
 	}
 	if "`saveresampling'"!="" {
 		tempvar originalorder
 		tempfile preservetemp
+		tempfile resamplingtemp
 		gen `originalorder'=_n
-		qui save `"`saveresampling'"'
+		qui save `"`resamplingtemp'"'
 	}
 	if "`strata'" == "" {
             tempvar strata
             gen `strata' = 1
-        }
+		local strata_orignal_varnames none
+    }
+	else {
+		local strata_orignal_varnames "`strata'"
+	}
+
     if "`cluster'" == "" {
             tempvar cluster 
             gen `cluster' = _n
@@ -316,11 +324,34 @@ program RItest, rclass
 		}
 		local replace	`"`s(replace)'"'
 	}
+	if `"`fixlevels'"' != "" {
+		tempvar fixedvalues_indicator
+		gen `fixedvalues_indicator'=.
+		local ccc 0
+		foreach value of local fixlevels {
+			sum `resampvar'  if `resampvar'==`value'
+			if r(N)==0 {
+				di as err "you specified to hold observations with `resampvar'==`value' fixed, but it seems there are no such observations"
+			}
+			else {
+				replace  `fixedvalues_indicator' = `ccc++' if `resampvar'==`value'
+			}
+		}
+	
+	}
 	if `"`strata'"' != "" {
 		if `:list resampvar in strata' {
 			di as err "permutation variable may not be specified in strata() option"
 			exit 198
 		}
+		//I replace strata by single varialbe to simply computation and 
+		tempvar strata_
+		egen `strata_' = group(`strata' `fixedvalues_indicator'), missing
+		if `"`fixlevels'"' != "" {
+				local strata_orignal_varnames `"`strata_orignal_varnames' (created separate strata for `resampvar'-values: `fixlevels')"'
+		}
+		local strata  `strata_'
+		
 		tempvar sflag touse
 		mark `touse'
 		markout `touse' `strata', strok
@@ -335,6 +366,9 @@ program RItest, rclass
 		qui loneway `resampvar' `strata'
 		if (r(sd_w) == 0){
 			di as err "Warning: some strata contain no variation in `resampvar'"
+			if `"`fixlevels'"' != "" {
+				di as err "You specified fixlevels(`fixlevels'). This may be responsible for this warning and is not necessarily a problem."
+			}
 		}
 	}
 	if `"`cluster'"' != "" {
@@ -442,12 +476,12 @@ program RItest, rclass
      	if "`saveresampling'"!="" {
 			qui save `"`preservetemp'"',replace
 			rename `resampvar' `resampvar'`i'
-			cap qui merge 1:1 `originalorder' using `"`saveresampling'"', nogen
+			cap qui merge 1:1 `originalorder' using `"`resamplingtemp'"', nogen
 			rename `originalorder' keep`originalorder'
 			drop __*
 			rename keep`originalorder' `originalorder'
 			cap order `resampvar'* , last
-			qui save `"`saveresampling'"', replace
+			qui save `"`resamplingtemp'"', replace
 			use `"`preservetemp'"', clear
 		}
 		
@@ -494,6 +528,9 @@ program RItest, rclass
 
 	// cleanup post
 	postclose `postnam'
+	if `"`saveresampling'"'!="" {
+		cp "`resamplingtemp'" `"`saveresampling'"'
+	}
 
 	// load file `saving' with permutation results and display output
 	capture use `"`saving'"', clear
@@ -546,6 +583,7 @@ program RItest, rclass
 	char _dta[N_clust] `N_clust'
 	char _dta[seed] "`seed'"
 	char _dta[strata] `ustrata'
+	char _dta[strata_orignal_varnames] `"`strata_orignal_varnames'"'
 	char _dta[clustvar] `clustvar'
 	char _dta[N] `obs'
 	char _dta[resampvar] "`resampvar'"
@@ -692,6 +730,7 @@ program rit_GetResults, rclass
 	}
 	// strata variable
 	if "`nstrata'" != "" {
+		local strata_orignal_varnames : char _dta[strata_orignal_varnames]
 		local strata : char _dta[strata]
 		if "`strata'" != "" {
 			capture confirm names `strata'
@@ -829,10 +868,14 @@ program rit_GetResults, rclass
 	return local resampvar `resampvar'
 	if "`nstrata'" != "" {
 		return scalar N_strata = `nstrata'
+		if "`strata_orignal_varnames'" != "" {
+			return local strata_orignal_varnames `"`strata_orignal_varnames'"'
+		}
 		if "`strata'" != "" {
 			return local strata `strata'
 		}
 	}
+
 	if "`N_clust'" != "" {
 		return scalar N_clust = `N_clust'
 		if "`clustvar'" != "" {
@@ -884,13 +927,13 @@ program rit_DisplayResults, rclass
 				di as txt %`s(col1)'s "Clust. var(s)" as res ":  `r(clustvar)'"
 				di as txt %`s(col1)'s "Clusters" as res ":  `r(N_clust)'"
 			}
-			if !missing(r(N_strata)) & "`r(strata)'" != "" {
-				di as txt %`s(col1)'s "Strata var(s)" as res ":  `r(strata)'"
+			if !missing(r(N_strata)) & "`r(strata_orignal_varnames)'" != "" {
+				di as txt %`s(col1)'s "Strata var(s)" as res ":  `r(strata_orignal_varnames)'"
 				di as txt %`s(col1)'s "Strata" as res ":  `r(N_strata)'"
 			}
 		}
 		else {
-			di as txt %`s(col1)'s "Resampling" as text proper(":  `sampling_method'")
+			di as txt %`s(col1)'s "Resampling" as text ":  `sampling_method'"
 		}
 		
 	}
