@@ -21,7 +21,7 @@ Heß, Simon, "Randomization inference with Stata: A guide and software" *Stata J
 There are no known bugs. The number of people who have used the code until now is small though, so please report any unintend or surprising behaviour. 
 
 ## Changelog
- - **1.1.0** added an option (fixlevels()) to constrain re-randomization to certain valuse of the treatment variable. This can be used for pairwise tests in multi-treatment experiments.
+ - **1.1.0** added an option (fixlevels()) to constrain re-randomization to certain values of the treatment variable. This can be used for pairwise tests in multi-treatment experiments, by  restricting permutation to only some treatment arms. 
  - **1.0.9** added the strict and the eps option to the helpfile and added parameter-checks so that "strict" enforces "eps(0)". h/t Katharina Nesselrode
  - **1.0.8** minor bugfix and I got rid of the google analytics part
  - **1.0.7** Jason Kerwin pointed out that when string variables were used as strata or cluster ids, all observations were treated as belonging to the same. This is fixed with this version. Also I sped up execution time by dropping unneeded code.
