@@ -1,5 +1,5 @@
 ﻿# ritest
-Stata package to perform randomization inference on any stata command.
+Stata package to perform randomization inference on any Stata command.
 
 The first version was published alongside an [article in the Stata Journal](http://www.stata-journal.com/article.html?article=st0489). I provide provide regular updates through GitHub.
 
