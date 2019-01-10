@@ -1,5 +1,6 @@
-*! version 1.1.0 oct2018.
+*! version 1.1.2 jan2019.
 ***** Changelog
+*1.1.2 Fixed the issue that data sanity checks were applied to the full sample, even if and [if] or [in]-statement was used to restrict analysis to a subsample. h/t fred finan
 *1.1.0 added a new option "fixlevels" to contstraint he rerandomization to certain levels of the treatment variable
 *1.0.9 added the strict and the eps option to the helpfile and added parameter-checks so that "strict" enforces "eps(0)". h/t Katharina Nesselrode
 *1.0.8 fixed (removed `') the "replace" option for the postfile statement as it was causing trouble when running ritest in wine and also I deactivated google analytics tracking
@@ -11,6 +12,21 @@
 *1.0.3 hide the warnings introduced with 1.0.1, as requested by stata jounral 
 *1.0.2 "if" and  "in" for the subcommand will now be considered irrespective of "drop" or "nodrop" are specified 
 *1.0.1 now can be called with the option RANDOMIZATIONProgram OR SAMPLINGprogram
+
+/* just some sample code i sometimes use for debuggin
+set seed 2
+clear
+set obs 40
+gen cluster=_n
+gen tr = mod(_n,2)
+expand 20
+replace tr=2 if rnormal()>3
+gen y = rnormal()+tr*0.01
+reg y tr
+ritest tr _b[tr], cluster(cluster) seed(1): reg y tr if tr!=2
+ritest tr r(rho), cluster(cluster) seed(1): corr y tr if tr!=2
+*/
+
 
 cap program drop ritest
 cap program drop RItest
@@ -77,7 +93,7 @@ program RItest, rclass
 	// check all weights and stuff
 	`version' _prefix_command ritest `wgt' `if' `in' , ///
 		`efopt' `level': `command'
-
+	
 	if "`force'" == "" & `"`s(wgt)'"' != "" {
 		// ritest does not allow weights unless force is used
 		local 0 `s(wgt)'
@@ -94,6 +110,7 @@ program RItest, rclass
 	local efopt	`"`s(efopt)'"'
 	local level	`"`s(level)'"'
 	local command	`"`s(command)'"'
+	local ifin `"`s(if)' `s(in)'"'
 	
 	//now check the options
 	local 0 `", `options'"'
@@ -234,8 +251,16 @@ program RItest, rclass
 	}
      
 	// run the command using the entire dataset (for output)
-	`noi' `command'
-
+	`noisily' `command'
+	/*qui qui reg `resampvar'
+	macro dir
+	sreturn list
+	di "xxx`if'xxx"*/
+	
+	//mark the sample to be used
+	tempvar touse
+	mark `touse' `ifin'
+	
 	preserve
 	if ("`null'"!="") {
 		di as text "User specified non-zero null hypothesis" 
@@ -329,7 +354,7 @@ program RItest, rclass
 		qui gen `fixedvalues_indicator'=.
 		local ccc 0
 		foreach value of local fixlevels {
-			qui sum `resampvar'  if `resampvar'==`value'
+			qui sum `resampvar'  if `resampvar'==`value' & `touse'
 			if r(N)==0 {
 				di as err "you specified to hold observations with `resampvar'==`value' fixed, but it seems there are no such observations"
 			}
@@ -352,8 +377,7 @@ program RItest, rclass
 		}
 		local strata  `strata_'
 		
-		tempvar sflag touse
-		mark `touse'
+		tempvar sflag 
 		markout `touse' `strata', strok
 		sort `touse' `strata', stable
 		by `touse' `strata': gen `sflag' = _n==1 if `touse'
@@ -363,7 +387,7 @@ program RItest, rclass
 		local strata `sflag'
 		sort `strata' , stable
 		
-		qui loneway `resampvar' `strata'
+		qui loneway `resampvar' `strata'  if `touse'
 		if (r(sd_w) == 0){
 			di as err "Warning: some strata contain no variation in `resampvar'"
 			if `"`fixlevels'"' != "" {
@@ -376,9 +400,10 @@ program RItest, rclass
 			di as err "permutation variable may not be specified in strata() option"
 			exit 198
 		}
-		tempvar cflag touse
-		mark `touse'
+		tempvar cflag 
+
 		markout `touse' `strata' `cluster'  , strok
+
 		sort  `touse' `strata' `cluster' , stable
 		by `touse' `strata' `cluster': gen `cflag' = _n==1 if `touse'
 		qui replace `cflag' = sum(`cflag')
@@ -387,11 +412,12 @@ program RItest, rclass
 		local cluster `cflag'
 		sort  `strata' `cluster', stable
 		
-		qui loneway `resampvar' `cflag'
+		qui loneway `resampvar' `cflag'  if `touse'
 		if (r(sd_w) != 0 & !missing(r(sd_w))) {
-			di as err "`resampvar' doesnt seem to be constant within clusters"
+			di as err "`resampvar' does not seem to be constant within clusters"
 			exit 9999
 		}
+
 	}
     
 	
