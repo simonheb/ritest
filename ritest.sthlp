@@ -309,7 +309,7 @@ effect based on a regression controlling for age. {p_end}
 {title:Citation}
 
 {pstd}
-Heß, Simon H., "Randomization inference with Stata: A guide and software" {it:Stata Journal} 17(3) pp. 630-651.
+Heß, Simon, "Randomization inference with Stata: A guide and software" {it:Stata Journal} 17(3) pp. 630-651.
 {p_end}
 {pstd}
 {browse "https://raw.githubusercontent.com/simonheb/ritest/master/ritest.bib":BibTeX-file}.
@@ -321,9 +321,9 @@ Heß, Simon H., "Randomization inference with Stata: A guide and software" {it:S
 Simon Heß, Goethe University Frankfurt.{p_end}
 
 {pstd}
-The latest version of ritest can always be obtained from {browse "https://github.com/simonheb/ritest"} or {browse "http://HessS.org"}. I am happy to receive comments and suggestions regarding bugs or possibilites for improvements/extensions via {browse "https://github.com/simonheb/ritest/issues"}.
+The latest version of ritest can always be obtained from {browse "https://github.com/simonheb/ritest"} or {browse "http://HessS.org"}. I am happy to receive comments and suggestions regarding bugs or ideas for improvements/extensions via {browse "https://github.com/simonheb/ritest/issues"}.
 {p_end}
 
 {pstd}
-The {cmd:ritest}-code is based on and borrows heavily from the code for {cmd:permute}.
+The {cmd:ritest}-code is based on the code for {cmd:permute}.
 {p_end}
