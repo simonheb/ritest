@@ -1,13 +1,13 @@
-﻿v 1.1.2
-d ritest - Randomization inference with Stata
+﻿v 3
+d ritest - Randomization inference and permutation tests, allowing for arbitrary randomization procedures with any Stata command.
 d Author: Simon Heß, Goethe University Frankfurt, Germany
 d Support: simon.h.hess@gmail.com
 d
 d For details, see:
 d http://HessS.org
 d
-d Distribution-Date: 20190203
-d
+d Distribution-Date: 20190204
+
 f ritest.ado
 f ritest.sthlp
 f example_classes.dta
