@@ -53,8 +53,8 @@ ritest treatment _b[treatment]: `e(cmdline)'
 ```
 extract the RI p-values:
 ```
-matrix pvalues=r(p) //here I save the p-values from ritest
-mat colnames pvalues = treatment //need to name p-values so that esttab knows to which coefficient they belong 
+matrix pvalues=r(p) //save the p-values from ritest
+mat colnames pvalues = treatment //name p-values so that esttab knows to which coefficient they belong 
 est restore regressionresult        
 ```
 display the p-values in the table footer:
