@@ -68,16 +68,17 @@ estadd matrix pvalues = pvalues
 esttab regressionresult, cells(b p(par) pvalues(par([ ])))
 ```
 
-### Can you give a simple example using ritest together with a difference-in-differences regression with binary treatment and panel data?
+### Can you give a simple example using `ritest` together with a difference-in-differences regression with binary treatment and panel data?
 This won't  work:
 ```
 gen treatpost = treatment*post
 ritest treatment _b[treatpost]: reg y treatment post treatpost
 ```
-because
+for two reasons:
  - `ritest` will keep permuting `treatment`, but is not aware that  `treatpost` will need to be updated as well.
- - `ritest` does not know that `treatment` has to be held constant within units
- instead run:
+ - `ritest` does not know that `treatment` has to be held constant within units.
+ 
+instead run:
 ```
 ritest treatment _b[c.treatment#c.post], cluster(unit_id): reg y c.treatment##c.post
 ```
