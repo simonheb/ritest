@@ -1,9 +1,15 @@
-﻿# ritest
+# ritest
 Stata package to perform randomization inference on any Stata command.
 
-The first version was published alongside an [article in the Stata Journal](http://www.stata-journal.com/article.html?article=st0489). I provide provide regular updates through GitHub.
+ToC:
+ - [Install](#install) 
+ - [Citation](#citation)
+ - [Changelog](#changelog)
+ - [Media Coverage](#media-coverage)
+ - [FAQ](#faq)
 
-## Installation
+
+## Install
 To obtain the latest version through github, from the main window in Stata, run:
 ```
 net describe ritest, from(https://raw.githubusercontent.com/simonheb/ritest/master/)
@@ -18,7 +24,7 @@ Heß, Simon, "Randomization inference with Stata: A guide and software" *Stata J
 [BibTeX record](https://raw.githubusercontent.com/simonheb/ritest/master/ritest.bib)
 
 ## Bugs
-There are no known bugs. The number of people who have used the code until now is small though, so please report any unintend or surprising behaviour. 
+There are no known bugs. Please report any unintend or surprising behaviour. 
 
 ## Changelog
  - **1.1.2** Fixed the issue that data sanity checks were applied to the full sample, even if and [if] or [in]-statement was used to restrict analysis to a subsample. h/t Fred Finan
@@ -36,3 +42,42 @@ There are no known bugs. The number of people who have used the code until now i
 
 ## Disclaimer of Warranties and Limitation of Liability
 Use at own risk. You agree that use of this software is at your own risk. The author is optimistic but does not make any warranty as to the results that may be obtained from use of this software. The author would be very happy to hear about any issues you might find and will be transparent about changes made in response to user inquiries.
+
+
+## FAQ
+
+### How do I export ritest results with `estout`?
+run ritest:
+```eststo regressionresult: reg y treatment controls 
+ritest treatment _b[treatment]: `e(cmdline)'
+```
+extract the RI p-values:
+```
+matrix pvalues=r(p) //here I save the p-values from ritest
+mat colnames pvalues = treatment //need to name p-values so that esttab knows to which coefficient they belong 
+est restore regressionresult        
+```
+display the p-values in the table footer:
+```
+estadd scalar pvalue_treat = pvalues[1,1]
+esttab regressionresult, stats(pvalue_treat)
+```
+alternatively, display the p-values next to the coefficient 
+```
+estadd matrix pvalues = pvalues
+esttab regressionresult, cells(b p(par) pvalues(par([ ])))
+```
+
+### Can you give a simple example using ritest together with a difference-in-differences regression with binary treatment and panel data?
+This won't  work:
+```
+gen treatpost = treatment*post
+ritest treatment _b[treatpost]: reg y treatment post treatpost
+```
+because
+ - `ritest` will keep permuting `treatment`, but is not aware that  `treatpost` will need to be updated as well.
+ - `ritest` does not know that `treatment` has to be held constant within units
+ instead run:
+```
+ritest treatment _b[c.treatment#c.post], cluster(unit_id): reg y c.treatment##c.post
+```
