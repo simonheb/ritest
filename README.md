@@ -45,8 +45,10 @@ Use at own risk. You agree that use of this software is at your own risk. The au
 
 
 ## FAQ
+1. [Exporting Results](#how-do-i-export-ritest-results-with-estout)
+2. [Using a `ritest` wit a difference-in-differences estimator](#can-you-give-a-simple-example-using-ritest-together-with-a-difference-in-differences-regression-with-binary-treatment-and-panel-data)
 
-### How do I export ritest results with `estout`?
+### How do I export ritest results to TeX/CSV/... with `esttab`/`estout`?
 run ritest:
 ```eststo regressionresult: reg y treatment controls 
 ritest treatment _b[treatment]: `e(cmdline)'
@@ -68,7 +70,9 @@ estadd matrix pvalues = pvalues
 esttab regressionresult, cells(b p(par) pvalues(par([ ])))
 ```
 
-### Can you give a simple example using `ritest` together with a difference-in-differences regression with binary treatment and panel data?
+### Can you give a simple example using `ritest` with a difference-in-differences
+Setup: binary treatment and panel data.
+
 This won't  work:
 ```
 gen treatpost = treatment*post
