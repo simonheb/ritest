@@ -46,7 +46,7 @@ Use at own risk. You agree that use of this software is at your own risk. The au
 
 ## FAQ
 1. [Exporting Results](#esttab)
-2. [Using a `ritest` wit a difference-in-differences estimator](#did)
+2. [Using `ritest` With a Difference-in-Differences Estimator](#did)
 
 ### <a name="esttab"></a>How do I export ritest results to TeX/CSV/... with `esttab`/`estout`? 
 run ritest:
