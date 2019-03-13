@@ -50,7 +50,8 @@ Use at own risk. You agree that use of this software is at your own risk. The au
 
 ### <a name="esttab"></a>How do I export ritest results to TeX/CSV/... with `esttab`/`estout`? 
 run ritest:
-```eststo regressionresult: reg y treatment controls 
+```
+eststo regressionresult: reg y treatment controls 
 ritest treatment _b[treatment]: `e(cmdline)'
 ```
 extract the RI p-values:
