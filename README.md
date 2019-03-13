@@ -70,7 +70,7 @@ estadd matrix pvalues = pvalues
 esttab regressionresult, cells(b p(par) pvalues(par([ ])))
 ```
 
-### <a name="did"></a>Can you give a simple example using `ritest` with a difference-in-differences 
+### <a name="did"></a>Can you give a simple example using `ritest` with a difference-in-differences regression
 Setup: binary treatment and panel data.
 
 This won't  work:
