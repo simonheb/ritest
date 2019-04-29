@@ -1,7 +1,6 @@
 # ritest
 Stata package to perform randomization inference on any Stata command.
 
-ToC:
  - [Install](#install) 
  - [Citation](#citation)
  - [Changelog](#changelog)
