@@ -20,7 +20,7 @@ If the download from within Stata fails (e.g. because you are behind a firewall)
 ## Citation
 `ritest` is not an offical State command. It is a piece of software I wrote and made freely available to the community. Please cite:
 
-Heß, Simon, "Randomization inference with Stata: A guide and software" *Stata Journal* 17(3) pp. 630-651. [[cite](https://raw.githubusercontent.com/simonheb/ritest/master/ritest.bib)]
+Heß, Simon, "Randomization inference with Stata: A guide and software" *Stata Journal* 17(3) pp. 630-651. [[bibtex](https://raw.githubusercontent.com/simonheb/ritest/master/ritest.bib)]
 
 ## Bugs
 There are no known bugs. Please report any unintend or surprising behaviour. 
