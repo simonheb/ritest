@@ -92,7 +92,7 @@ ritest treatment _b[c.treatment#c.post], cluster(unit_id): reg y c.treatment##c.
 ### <a name="3arms"></a>I have 3 treatment arms. How do I use `ritest`?
 Setup: There are three treatment arms (0=Control, 1=Treatment A, 2=Treatment B).
 
-What do yo want to test? David McKenzie has a short discussion of this [here](http://blogs.worldbank.org/impactevaluations/finally-way-do-easy-randomization-inference-stata). In short, there are three min hypotheses one might want to test. (a) Treatment A is no different from Control, (b) Treatment B is no different from Controls and (c) the two treatments are indistinguishable.
+What do yo want to test? David McKenzie has a short discussion of this [here](http://blogs.worldbank.org/impactevaluations/finally-way-do-easy-randomization-inference-stata). In short, there are three main hypotheses one might want to test. (a) Treatment A is no different from Control, (b) Treatment B is no different from Controls and (c) the two treatments are indistinguishable.
 
 Here give an example for (a). (b) and (c) are conducted analogously. First, make sure that you define a single treatment varaible that encodes all three cases as above. Then you can either run:
 
