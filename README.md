@@ -93,16 +93,18 @@ Setup: There are three treatment arms (0=Control, 1=Treatment A, 2=Treatment B).
 
 What do yo want to test? David McKenzie has a short discussion of this [here](http://blogs.worldbank.org/impactevaluations/finally-way-do-easy-randomization-inference-stata). In short, there are three min hypotheses one might want to test. (a) Treatment A is no different from Control, (b) Treatment B is no different from Controls and (c) the two treatments are indistinguishable.
 
-Here give an example for (a). (b) and (c) are conducted analogously. First, make sure that you define a single treatment varaible that encodes all 3 cases as above. Then you can either run:
+Here give an example for (a). (b) and (c) are conducted analogously. First, make sure that you define a single treatment varaible that encodes all three cases as above. Then you can either run:
 
 ```
 ritest treatment _b[1.treatment], .... : reg y i.treatment if treatment != 2
 ```
-or alternatively
+or
 ```
 ritest treatment _b[1.treatment], .... : reg y i.treatment, fixlevels(2)
 ```
 
-The two variants are slighly different. The first one completely drops observations of Treatment B, assuming they are useless for identifying differences between Treatment A and control. The second one keeps these observations in the estimation sample, but excludes them from the re-randomization. Keeping them in the estimation and re-randomization would make no sense, as this would pool Treatment B and the control group and thus test a weird hypotheses.
+The two variants are slightly different. The first one completely drops observations of Treatment B, assuming they are useless for identifying differences between Treatment A and control. The second one keeps these observations in the estimation sample, but excludes them from the re-randomization. Keeping them in the estimation and re-randomization would make no sense, as this would pool Treatment B and the control group and thus test a weird hypothesis.
 
-The two variants could lead to different results if the observations of group B affect the estimation of `_b[1.treatment]`. Sometimes this can be good, for example, if your regression includes control variables and their coefficients become more precesely estimated when the full sample is used. In turn, the more precisely estimated control varible coefficient improves the estimate `_b[1.treatment]`, which could be advantageous.
+The two variants could lead to different results if the observations of group B affect the estimation of `_b[1.treatment]`. Sometimes this can be good; for example, if your regression includes control variables and their coefficients become more precisely estimated when the full sample is used. In turn, the more precisely estimated control variable coefficient improves the estimate `_b[1.treatment]`, which could be advantageous.
+
+
