@@ -103,6 +103,7 @@ or
 ```
 ritest treatment _b[1.treatment], fixlevels(2)  .... : reg y i.treatment
 ```
+(for this you'll need the latest version of `ritest`)
 
 The two variants are slightly different. The first one completely drops observations of Treatment B, assuming they are useless for identifying differences between Treatment A and control. The second one keeps these observations in the estimation sample, but excludes them from the re-randomization. Keeping them in the estimation and re-randomization would make no sense, as this would pool Treatment B and the control group and thus test a weird hypothesis.
 
