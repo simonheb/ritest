@@ -136,16 +136,16 @@ I will use this example output to explain all elements:
 2. The statistic that is evaluated after each run of the command
 3. The variable that is be permuted/re-sampled
 4. A string indicating how the variable is permuted/re-sampled
-5. The variable that identifies treatment clusters. If none are given stata will show the name of a tempvar here (`__000000`)
+5. The variable that identifies treatment clusters. If none are given Stata will show the name of a tempvar here (`__000000`)
 6. The number of different clusters.
 7. The variable that identifies treatment strata.
-8. The numbero of strata
+8. The number of strata
 9. The main table
   * `T(obs)` The realization of the test statistic in the data
-  * `c` the count of under how many of the re-samplinged assignments, the realization of the test-statistic was more extreme than `T(obs)`
+  * `c` the count of under how many of the re-sampled assignments, the realization of the test-statistic was more extreme than `T(obs)`
   * `n` the overall count of re-samplings
   * `p=c/n` the actual randomization inference based p-value. I.e. the fraction of extreme realizations
-  * `SE(p)` the standard error of that p-value estimate, based on the "sample" of `n` re-samplings. This does not say much about whether your hypothesis has to be rejected or not and it's mainly a function of how many permutations you choose.
+  * `SE(p)` the standard error of that p-value estimate, based on the "sample" of `n` re-samplings. This does not say much about whether your hypothesis has to be rejected or not and it is mainly a function of how many permutations you choose.
   * `95% Conf. Interval` this too is an estimated confidence interval *for the p-value*, i.e. by choosing the number of re-samplings large enough, this can be made arbitrarily tight.
   
-Finally, the notes indicate which hypotheses is tested. It can be changed by chosing an option to estimate one-sided p-values.
+Finally, the notes indicate which hypotheses is tested. It can be changed by choosing an option to estimate one-sided p-values.
