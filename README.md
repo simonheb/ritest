@@ -47,6 +47,7 @@ Use at own risk. You agree that use of this software is at your own risk. The au
 1. [Exporting Results](#esttab)
 2. [Using `ritest` with a Difference-in-Differences Estimator](#did)
 3. [Multiple Treatment Arms](#3arms)
+4. [Interpreting `ritest` Output](#output)
 
 ### <a name="esttab"></a>How do I export ritest results to TeX/CSV/... with `esttab`/`estout`? 
 run ritest:
@@ -140,4 +141,11 @@ I will use this example output to explain all elements:
 7. The variable that identifies treatment strata.
 8. The numbero of strata
 9. The main table
-... * T(obs)
+  * `T(obs)` The realization of the test statistic in the data
+  * `c` the count of under how many of the re-samplinged assignments, the realization of the test-statistic was more extreme than `T(obs)`
+  * `n` the overall count of re-samplings
+  * `p=c/n` the actual randomization inference based p-value. I.e. the fraction of extreme realizations
+  * `SE(p)` the standard error of that p-value estimate, based on the "sample" of `n` re-samplings. This does not say much about whether your hypothesis has to be rejected or not and it's mainly a function of how many permutations you choose.
+  * `95% Conf. Interval` this too is an estimated confidence interval *for the p-value*, i.e. by choosing the number of re-samplings large enough, this can be made arbitrarily tight.
+  
+Finally, the notes indicate which hypotheses is tested. It can be changed by chosing an option to estimate one-sided p-values.
