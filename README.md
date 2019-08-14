@@ -111,21 +111,33 @@ The two variants could lead to different results if the observations of group B 
 
 
 ### <a name="output"></a>How to I read the output?
+I will use this example output to explain all elements:
 ```
-      command:  areg outcome treatment, r abs(block)
-        _pm_1:  _b[treatment]/_se[treatment]
-  res. var(s):  treatment
-   Resampling:  Permuting treatment
-Clust. var(s):  __000000
-     Clusters:  99
-Strata var(s):  block
-       Strata:  4
-
-------------------------------------------------------------------------------
-T            |     T(obs)       c       n   p=c/n   SE(p) [95% Conf. Interval]
--------------+----------------------------------------------------------------
-       _pm_1 |   2.362446      14     500  0.0280  0.0074  .0153906   .0465333
-------------------------------------------------------------------------------
-Note: Confidence interval is with respect to p=c/n.
-Note: c = #{|T| >= |T(obs)|}
+ 0: ritest treatment _b[treatment]/_se[treatment], reps(500) strata(block): areg outcome treatment, r abs(block)
+ 1:      command:  areg outcome treatment, r abs(block)
+ 2:        _pm_1:  _b[treatment]/_se[treatment]
+ 3:  res. var(s):  treatment
+ 4:   Resampling:  Permuting treatment
+ 5:Clust. var(s):  __000000
+ 6:     Clusters:  99
+ 7:Strata var(s):  block
+ 8:       Strata:  4
+ 9:
+10:------------------------------------------------------------------------------
+11:T            |     T(obs)       c       n   p=c/n   SE(p) [95% Conf. Interval]
+12:-------------+----------------------------------------------------------------
+13:       _pm_1 |   2.362446      14     500  0.0280  0.0074  .0153906   .0465333
+14:------------------------------------------------------------------------------
+15:Note: Confidence interval is with respect to p=c/n.
+16:Note: c = #{|T| >= |T(obs)|}
 ```
+1. The full command that is re-estimated at every iteration
+2. The statistic that is evaluated after each run of the command
+3. The variable that is be permuted/re-sampled
+4. A string indicating how the variable is permuted/re-sampled
+5. The variable that identifies treatment clusters. If none are given stata will show the name of a tempvar here (`__000000`)
+6. The number of different clusters.
+7. The variable that identifies treatment strata.
+8. The numbero of strata
+9. The main table
+... * T(obs)
