@@ -110,3 +110,22 @@ The two variants are slightly different. The first one completely drops observat
 The two variants could lead to different results if the observations of group B affect the estimation of `_b[1.treatment]`. Sometimes this can be good; for example, if your regression includes control variables and their coefficients become more precisely estimated when the full sample is used. In turn, the more precisely estimated control variable coefficient improves the estimate `_b[1.treatment]`, which could be advantageous.
 
 
+### <a name="output"></a>How to I read the output?
+```
+      command:  areg outcome treatment, r abs(block)
+        _pm_1:  _b[treatment]/_se[treatment]
+  res. var(s):  treatment
+   Resampling:  Permuting treatment
+Clust. var(s):  __000000
+     Clusters:  99
+Strata var(s):  block
+       Strata:  4
+
+------------------------------------------------------------------------------
+T            |     T(obs)       c       n   p=c/n   SE(p) [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       _pm_1 |   2.362446      14     500  0.0280  0.0074  .0153906   .0465333
+------------------------------------------------------------------------------
+Note: Confidence interval is with respect to p=c/n.
+Note: c = #{|T| >= |T(obs)|}
+```
