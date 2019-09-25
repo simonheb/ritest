@@ -1,5 +1,6 @@
-*! version 1.1.2 jan2019.
+*! version 1.1.3 sep2019.
 ***** Changelog
+*1.1.3 Updated version statement, because older versions (11) of Stata couldn't handle some of the code
 *1.1.2 Fixed the issue that data sanity checks were applied to the full sample, even if and [if] or [in]-statement was used to restrict analysis to a subsample. h/t fred finan
 *1.1.0 added a new option "fixlevels" to contstraint he rerandomization to certain levels of the treatment variable
 *1.0.9 added the strict and the eps option to the helpfile and added parameter-checks so that "strict" enforces "eps(0)". h/t Katharina Nesselrode
@@ -40,7 +41,7 @@ cap program drop rit_TableFoot
 cap program drop ClearE
 
 program ritest
-	version 11
+	version 13
 
 	set prefix ritest
 
@@ -65,8 +66,8 @@ program ritest
 end
 
 program RItest, rclass
-	version 11
-	local ritestversion "1.0.9"
+	version 13
+	local ritestversion "1.1.13"
 	// get name of variable to permute
 	gettoken resampvar 0 : 0, parse(" ,:")
 	confirm variable `resampvar'
@@ -149,7 +150,7 @@ program RItest, rclass
 	]
 	_get_diopts diopts, `options' //this makes sure no false options are passed
 
-	//AT version 1.0.3 I will switch from calling things "Sampling*" to calling them "Randomization*".
+	//AT version 1.0.3 I switched from calling things "Sampling*" to calling them "Randomization*".
 	//The following is to create backwardscompatibility and to make sure the code doesnt need to be changed
 	//as long as the errs are commented out, the different options are just synonyms
 	if ("`saveresampling'"=="") {
