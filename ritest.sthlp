@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.0 oct2018}{...}
+{* *! version 1.1.4 sep2019}{...}
 {vieweralsosee "[R] simulate" "help permute"}{...}
 {vieweralsosee "[R] bootstrap" "help bootstrap"}{...}
 {vieweralsosee "[R] jackknife" "help jackknife"}{...}
@@ -64,11 +64,11 @@ Compute p values for permutation tests, allowing for arbitrary randomization pro
 {synopt :{opt kdenstyo:options(string)}}additional options to be passed on to {it:kdensity} {p_end}
 {synopt :{opt sav:ing(filename)}} save a data set of estimates from the permutations{p_end}
 {synopt :{opt saver:esampling(filename)}}save all permutations of {it:resampvar} in a file called {it:filename} for later inspection.{p_end}
-{synopt :{opt noanal:ytics}}do not send anonymized usage statistics to google analytics{p_end}
 {synopt :{opt seed(#)}}set random-number seed to #{p_end}
 {synopt :{opt eps(#)}}numerical tolerance; seldom used, default 1e-7{p_end}
 {synopt :{opt strict}}computes the strict version of the test. p=c/N, with c = #{c -(}|T| > |T(obs)|{c )-}{p_end}
 {synopt :{opt force}}force  {cmd: ritest} to accept weights in {it:command} {p_end}
+{synopt :{opth reject(exp)}}identify invalid results{p_end}
 {synoptline}
 {p2colreset}
 
@@ -225,6 +225,11 @@ overconfident. Requires eps(0).
 {opt kdensityplot} produces a density plot of the realizations of expressions in
 {it:exp_list}. The realization for the expression in the original data is drawn
 as a vertical line.
+
+{phang}
+{opth reject(exp)} identifies an expression that indicates when results should
+be rejected.  When {it:exp} is true, the resulting values are reset to missing
+values.
 
 {marker examples}{...}
 {title:Examples}
