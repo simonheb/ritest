@@ -68,7 +68,7 @@ end
 
 program RItest, rclass
 	version 13
-	local ritestversion "1.1.13"
+	local ritestversion "1.1.4"
 	// get name of variable to permute
 	gettoken resampvar 0 : 0, parse(" ,:")
 	confirm variable `resampvar'
