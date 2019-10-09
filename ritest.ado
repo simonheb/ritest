@@ -1,5 +1,6 @@
-*! version 1.1.3 sep2019.
+*! version 1.1.4 sep2019.
 ***** Changelog
+*1.1.4 Added the reject() option, works as in permute
 *1.1.3 Updated version statement, because older versions (11) of Stata couldn't handle some of the code
 *1.1.2 Fixed the issue that data sanity checks were applied to the full sample, even if and [if] or [in]-statement was used to restrict analysis to a subsample. h/t fred finan
 *1.1.0 added a new option "fixlevels" to contstraint he rerandomization to certain levels of the treatment variable
@@ -67,7 +68,7 @@ end
 
 program RItest, rclass
 	version 13
-	local ritestversion "1.1.13"
+	local ritestversion "1.1.4"
 	// get name of variable to permute
 	gettoken resampvar 0 : 0, parse(" ,:")
 	confirm variable `resampvar'
@@ -137,6 +138,7 @@ program RItest, rclass
 		SAMPLINGPROGRAMOptions(string) ///
 		RANDOMIZATIONPROGRAMOptions(string) ///syno ^
 		null(string) ///
+		REJECT(string asis)	///
 		NOIsily			/// "prefix" options
 		LEft RIght		/// 
 		STRict			///
@@ -251,18 +253,13 @@ program RItest, rclass
 		di "ritest: First call to `cmdname' with data as is:" _n
 	}
      
-	// run the command using the entire dataset (for output)
+	// run the command using the entire dataset (for output) //this needs to be done before the data set is altered to account for `null'
 	`noisily' `command'
-	/*qui qui reg `resampvar'
-	macro dir
-	sreturn list
-	di "xxx`if'xxx"*/
-	
 	//mark the sample to be used
 	tempvar touse
 	mark `touse' `ifin'
 	
-	preserve
+	preserve  //this will only be restored in the very end 
 	if ("`null'"!="") {
 		di as text "User specified non-zero null hypothesis" 
 		local vari : word 1 of `null'
@@ -289,9 +286,18 @@ program RItest, rclass
 				
 
 	_prefix_clear, e r
-	// run the command using the entire dataset (to get the estimate)
+	// run the command using the entire dataset (to get the estimate) aftera imposing `null'
 	qui `noisily'		///
                 `command'
+				
+				
+				
+	// check for rejection of results from entire dataset
+	if `"`reject'"' != "" {
+		_prefix_reject ritest `cmdname' : `reject'
+		local reject `"`s(reject)'"'
+	}
+	
 	// expand eexp's that may be in eexplist, and build a matrix of the
 	// computed values from all expressions
 	tempname b
@@ -321,6 +327,7 @@ program RItest, rclass
 			exit 322
 		}
 	}
+	
 
 
 	local ropts	eps(`eps')		///
@@ -523,6 +530,21 @@ program RItest, rclass
 			post `postnam' `mis'
 		}
 		else {
+		
+			if `"`reject'"' != "" {
+				capture local rejected = `reject'
+				if c(rc) {
+					local rejected 1
+				}
+			}
+			if `rejected' {
+				local bad 1
+				`noi' di as error ///
+`"{p 0 0 2}rejected results from `cmdname', "' ///
+`"posting missing values{p_end}"'
+				post `postnam' `mis'
+			}
+			else {
 				forvalues j = 1/`K' {
 					capture scalar `x`j'' = `exp`j''
 					if (c(rc) == 1) error 1
@@ -537,7 +559,7 @@ program RItest, rclass
 					}
 				}
 				post `postnam' `xstats'
-//			}
+			}
 		}
 		if "`lessdots'"=="" {
 			`dots' `i' `bad'
