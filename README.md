@@ -46,9 +46,10 @@ Use at own risk. You agree that use of this software is at your own risk. The au
 
 ## FAQ
 1. [Exporting Results](#esttab)
-2. [Using `ritest` with a Difference-in-Differences Estimator](#did)
-3. [Multiple Treatment Arms](#3arms)
-4. [Interpreting `ritest` Output](#output)
+2. [Using `margins` or other pre/post-estimation commands before `ritest`](#wrapper)
+3. [Using `ritest` with a Difference-in-Differences Estimator](#did)
+4. [Multiple Treatment Arms](#3arms)
+5. [Interpreting `ritest` Output](#output)
 
 ### <a name="esttab"></a>How do I export ritest results to TeX/CSV/... with `esttab`/`estout`? 
 run ritest:
@@ -72,6 +73,21 @@ alternatively, display the p-values next to the coefficient
 estadd matrix pvalues = pvalues
 esttab regressionresult, cells(b p(par) pvalues(par([ ])))
 ```
+
+### <a name="wrapper"><a/>I don't want to use a simple coefficient estimate as test static, but something that requires several steps to be computed.
+
+In most cases, randomization inference will be based on observing the same coefficient estimate across different realizations of a treatment assignment. Even in nonlinear models (such as `probit`), inference on the point estimate often suffices. If not, you can also let `ritest` call a wrapper function  that executes additional commands, like `margins`:
+
+```
+program marginpost
+     syntax , command(string)
+     `command'
+     margins, dydx(_all) post
+end
+ritest treatment (_b[treatment]/_se[treatment]): marginpost, command(logit y x treatment)
+```
+Of course, you can still beef this up, by passing other arguments to the wrapper to make it more general. Whether or not this makes sense, depends entirely on your context. This may, for example make sense if you are not interested in plain coefficient estimate, but an interaction.
+ 
 
 ### <a name="did"></a>Can you give a simple example using `ritest` with a difference-in-differences regression?
 Setup: binary treatment and panel data.
