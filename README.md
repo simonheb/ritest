@@ -74,7 +74,9 @@ estadd matrix pvalues = pvalues
 esttab regressionresult, cells(b p(par) pvalues(par([ ])))
 ```
 
-### <a name="wrapper"><a/>As a test statistic, I want to use something that requires several steps to be computed, instead of a simple coefficient estimate (e.g. `margins`).
+### <a name="wrapper"><a/>As a test statistic, I want to use something that requires several steps to be computed, instead of a simple coefficient estimate. E.g. a `margins` result.
+
+Use a wrapper!
 
 In most cases, randomization inference will be based on observing the same coefficient estimate across different realizations of a treatment assignment. Even in nonlinear models (such as `probit`), inference on the point estimate often suffices. If not, you can also let `ritest` call a wrapper function  that executes additional commands, like `margins`:
 
