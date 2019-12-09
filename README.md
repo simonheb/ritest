@@ -85,6 +85,7 @@ program marginpost
      syntax , command(string)
      `command'
      margins, dydx(_all) post
+     //if the command you want to use does not "post" the results, you can make your wrapper programm "eclass" and use "estadd" to post something yourself.
 end
 ritest treatment (_b[treatment]/_se[treatment]): marginpost, command(logit y x treatment)
 ```
