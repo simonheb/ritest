@@ -46,7 +46,7 @@ Use at own risk. You agree that use of this software is at your own risk. The au
 
 ## FAQ
 1. [Exporting Results](#esttab)
-2. [Using `margins` or other pre/post-estimation commands before `ritest`](#wrapper)
+2. [Call `margins` or other Pre/Post-Estimation Commands Before `ritest`, Using Wrappers](#wrapper)
 3. [Using `ritest` with a Difference-in-Differences Estimator](#did)
 4. [Multiple Treatment Arms](#3arms)
 5. [Interpreting `ritest` Output](#output)
