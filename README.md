@@ -81,13 +81,13 @@ Use a wrapper!
 In most cases, randomization inference will be based on observing the same coefficient estimate across different realizations of a treatment assignment. Even in nonlinear models (such as `probit`), inference on the point estimate often suffices. If not, you can also let `ritest` call a wrapper function  that executes additional commands, like `margins`:
 
 ```
-program marginpost
+program margin_post_wrapper
      syntax , command(string)
      `command'
      margins, dydx(_all) post
      //if the command you want to use does not "post" the results, you can make your wrapper programm "eclass" and use "estadd" to post something yourself.
 end
-ritest treatment (_b[treatment]/_se[treatment]): marginpost, command(logit y x treatment)
+ritest treatment (_b[treatment]/_se[treatment]): margin_post_wrapper, command(logit y x treatment)
 ```
 Of course, you can still beef this up, by passing other arguments to the wrapper to make it more general. Whether or not this makes sense, depends entirely on your context. This may, for example make sense if you are not interested in plain coefficient estimate, but an interaction.
  
