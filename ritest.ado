@@ -1,5 +1,6 @@
-*! version 1.1.4 sep2019.
+*! version 1.1.5 jan2020.
 ***** Changelog
+*1.1.5 some fixes for filenames
 *1.1.4 Added the reject() option, works as in permute
 *1.1.3 Updated version statement, because older versions (11) of Stata couldn't handle some of the code
 *1.1.2 Fixed the issue that data sanity checks were applied to the full sample, even if and [if] or [in]-statement was used to restrict analysis to a subsample. h/t fred finan
@@ -162,7 +163,7 @@ program RItest, rclass
 		//di as err "You're using deprecated syntax -saveresampling-, please use -saverandomization- instead"
 	}
 	if ("`samplingsourcefile'"=="") {
-		local samplingsourcefile  `randomizationsourcefile'
+		local samplingsourcefile  `"`randomizationsourcefile'"'
 	}
 	else {
 		//di as err "You're using deprecated syntax -samplingsourcefile-, please use -randomizationsourcefile- instead"
@@ -227,7 +228,7 @@ program RItest, rclass
 
 	if "`samplingsourcefile'"!="" { //check if samplingsourcefile is okay and sort
             preserve
-            qui use "`samplingsourcefile'", clear
+            qui use `"`samplingsourcefile'"', clear
             qui sort `samplingmatchvar', stable
             qui desc
             if (r(k)-1)<`reps' {
@@ -480,7 +481,7 @@ program RItest, rclass
     }
 	else if "`method'"=="extfile" {
 		local samplingprogram permute_extfile
-		local samplingprogramoptions `"file("`samplingsourcefile'")      matchvars(`samplingmatchvar')"'
+		local samplingprogramoptions `"file(`"`samplingsourcefile'"')      matchvars(`samplingmatchvar')"'
     }
 	
 	if ("`noanalytics'"=="") 	{ //This was the GOOGLE-ANALYTICS bit
