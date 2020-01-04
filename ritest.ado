@@ -1,5 +1,6 @@
-*! version 1.1.5 jan2020.
+*! version 1.1.6 jan2020.
 ***** Changelog
+*1.1.6 fixes for spaces in filenames
 *1.1.5 some fixes for filenames
 *1.1.4 Added the reject() option, works as in permute
 *1.1.3 Updated version statement, because older versions (11) of Stata couldn't handle some of the code
@@ -685,13 +686,13 @@ program permute_extfile
     sort `matchvars', stable
     cap isid `matchvars'
     if c(rc) {
-        capture qui merge m:1 `matchvars' using `file', keepusing(`resampvar'`run') nogen 
+        capture qui merge m:1 `matchvars' using `"`file'"', keepusing(`resampvar'`run') nogen 
         if c(rc) {
             di as err "`resampvar'`run' does not exist in the permutation data set"
         }
     }
     else {
-        capture qui merge 1:1 `matchvars' using `file', keepusing(`resampvar'`run') nogen 
+        capture qui merge 1:1 `matchvars' using `"`file'"', keepusing(`resampvar'`run') nogen 
         if c(rc) {
             di as err "`resampvar'`run' does not exist in the permutation data set"
         }
