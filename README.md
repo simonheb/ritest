@@ -164,7 +164,7 @@ I will use this example output to explain all elements:
   * `T(obs)` The realization of the test statistic in the data
   * `c` the count of under how many of the re-sampled assignments, the realization of the test-statistic was more extreme than `T(obs)`
   * `n` the overall count of re-samplings
-  * `p=c/n` the actual randomization inference based p-value. I.e. the fraction of extreme realizations
+  * `p=c/n` the actual RI-based p-value, measuring the fraction of extreme realizations
   * `SE(p)` the standard error of that p-value estimate, based on the "sample" of `n` re-samplings. This does not say much about whether your hypothesis has to be rejected or not and it is mainly a function of how many permutations you choose.
   * `95% Conf. Interval` this too is an estimated confidence interval *for the p-value*, i.e. by choosing the number of re-samplings large enough, this can be made arbitrarily tight.
   
