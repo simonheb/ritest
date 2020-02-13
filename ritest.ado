@@ -1,5 +1,6 @@
-*! version 1.1.6 jan2020.
+*! version 1.1.7 feb2020.
 ***** Changelog
+*1.1.7 restore results of original estimation
 *1.1.6 fixes for spaces in filenames
 *1.1.5 some fixes for filenames
 *1.1.4 Added the reject() option, works as in permute
@@ -291,7 +292,8 @@ program RItest, rclass
 	// run the command using the entire dataset (to get the estimate) aftera imposing `null'
 	qui `noisily'		///
                 `command'
-				
+	tempname originalestimates
+	est store `originalestimates'
 				
 				
 	// check for rejection of results from entire dataset
@@ -648,6 +650,7 @@ program RItest, rclass
 	}
 
 	ClearE
+	qui est restore `originalestimates'
 	rit_Results, `ropts' 
 	return add
 	return scalar N_reps = `reps'
