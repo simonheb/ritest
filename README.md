@@ -50,6 +50,7 @@ Use at own risk. You agree that use of this software is at your own risk. The au
 3. [Using `ritest` with a Difference-in-Differences Estimator](#did)
 4. [Multiple Treatment Arms](#3arms)
 5. [Interpreting `ritest` Output](#output)
+6. [Confidence intervals](#cis)
 
 ### <a name="esttab"></a>How do I export ritest results to TeX/CSV/... with `esttab`/`estout`? 
 run ritest:
@@ -169,3 +170,37 @@ I will use this example output to explain all elements:
   * `95% Conf. Interval` this too is an estimated confidence interval *for the p-value*, i.e. by choosing the number of re-samplings large enough, this can be made arbitrarily tight.
   
 Finally, the notes indicate which hypotheses is tested. It can be changed by choosing an option to estimate one-sided p-values.
+
+
+
+### <a name="cis"></a>How to get confidence bands?
+Alwyn Young [http://personal.lse.ac.uk/YoungA/RandomizationConfidenceIntervals.pdf](describes here) (as others before him) how to find confidence bands for treatment effect estimates. This involves identifying the set of hypothesized treatment effects that cannot be rejected and can be implemeted by an iterative process. This code below gives an example of how this could be done with ritest. For a detailed discussion, caveats, and assumptions I recommend consulting [http://personal.lse.ac.uk/YoungA/RandomizationConfidenceIntervals.pdf](Alwyn Young's Paper).
+
+Example code:
+```
+//generate mock data
+set seed 123
+clear
+set obs 100
+gen treatment = _n>_N/2 //half are treated
+gen y = 0.3*treatment + rnormal() //there's a treatment effect
+reg y treatment //this is the standard ols result
+
+//run ritest to find which hypotheses for the treatment effect in [-1,1] can[not] be rejected
+tempfile gridsearch
+postfile pf TE pval using `gridsearch'
+forval i=-1(0.05)1 {
+	qui ritest treatment (_b[treatment]/_se[treatment]), reps(500) null(y `i') seed(123): reg y treatment //run ritest for the ols reg with the studentized treatment effect
+	mat pval = r(p)
+	post pf (`i') (pval[1,1])
+}
+postclose pf
+
+//show results to illustrate confidence intervals
+use `gridsearch', clear
+tw line pval TE , yline(0.05)
+```
+
+The result will be a dataset of hypothesis tests. In this it is easy to see for which hypothesized treatment effects, the null can be rejected, i.e., the confidence set.
+
+![Output graph illustrating the confidence bands](https://raw.githubusercontent.com/simonheb/ritest/master/Graph.png)
