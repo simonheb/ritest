@@ -174,7 +174,7 @@ Finally, the notes indicate which hypotheses is tested. It can be changed by cho
 
 
 ### <a name="cis"></a>How to get confidence bands?
-Alwyn Young [http://personal.lse.ac.uk/YoungA/RandomizationConfidenceIntervals.pdf](describes here) (as others before him) how to find confidence bands for treatment effect estimates. This involves identifying the set of hypothesized treatment effects that cannot be rejected and can be implemeted by an iterative process. This code below gives an example of how this could be done with ritest. For a detailed discussion, caveats, and assumptions I recommend consulting [http://personal.lse.ac.uk/YoungA/RandomizationConfidenceIntervals.pdf](Alwyn Young's Paper).
+Alwyn Young [describes here](http://personal.lse.ac.uk/YoungA/RandomizationConfidenceIntervals.pdf) how to find confidence bands for treatment effect estimates (others  discussed this before him, however the paper does a lot more and also gives a nice overiew - I definitely recommend reading it). This involves identifying the set of hypothesized treatment effects that cannot be rejected at a given level. This process can be implemeted by an iterative grid search in Stata. The code below gives a simplistic example of how this could be done with ritest. For a detailed discussion, caveats, and assumptions I recommend consulting [Alwyn Young's Paper](http://personal.lse.ac.uk/YoungA/RandomizationConfidenceIntervals.pdf).
 
 Example code:
 ```
@@ -201,6 +201,8 @@ use `gridsearch', clear
 tw line pval TE , yline(0.05)
 ```
 
-The result will be a dataset of hypothesis tests. In this it is easy to see for which hypothesized treatment effects, the null can be rejected, i.e., the confidence set.
+The result will be a dataset of hypothesis tests and corresponding p-values. In this data it is easy to see for which hypothesized treatment effects, the null can be rejected, i.e., the confidence set.
 
-![Output graph illustrating the confidence bands](https://raw.githubusercontent.com/simonheb/ritest/master/Graph.png)
+Here I am plotting the p-value against the hypothesized treatment effect. The red line is at 5%, so that the area in which the p-value is higher than the red line corresponds to the 95% confidence set.
+
+<img src="https://raw.githubusercontent.com/simonheb/ritest/master/Graph.png" alt="Output graph illustrating the confidence bands" width="333" />
