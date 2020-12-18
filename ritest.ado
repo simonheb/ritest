@@ -148,7 +148,7 @@ program RItest, rclass
 		noHeader		///  not documented
 		noLegend		///  not documented
 		NOANALYtics		/// now obsolete
-		COLLApse		/// not documented an not recommendet
+		COLLApse		/// not documented and not recommended
 		KDENSityplot	/// 
 		KDENSITYOptions(string)	///  not documented
 		*			///
