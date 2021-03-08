@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.7 feb2020}{...}
+{* *! version 1.1.8 mar2021}{...}
 {vieweralsosee "[R] simulate" "help permute"}{...}
 {vieweralsosee "[R] bootstrap" "help bootstrap"}{...}
 {vieweralsosee "[R] jackknife" "help jackknife"}{...}
@@ -62,8 +62,8 @@ Compute p values for permutation tests, allowing for arbitrary randomization pro
 {synopt :{opt null(outcome value)}}specify a null hypothesis of treatment effect {it:value} or {it:varname}  for outcome {it:outcome} {p_end}
 {synopt :{opt kdens:ityplot}}plot the densities of each statistic in {it:exp_list}{p_end}
 {synopt :{opt kdensityo:ptions(string)}}additional options to be passed on to {it:kdensity} {p_end}
-{synopt :{opt sav:ing(filename)}} save a data set of estimates from the permutations{p_end}
-{synopt :{opt saver:esampling(filename)}}save all permutations of {it:resampvar} in a file called {it:filename} for later inspection.{p_end}
+{synopt :{opt sav:ing(filename[, replace])}} save a data set of estimates from the permutations{p_end}
+{synopt :{opt saver:esampling(filename[, replace])}}save all permutations of {it:resampvar} in a file called {it:filename} for later inspection.{p_end}
 {synopt :{opt seed(#)}}set random-number seed to #{p_end}
 {synopt :{opt eps(#)}}numerical tolerance; seldom used, default 1e-7{p_end}
 {synopt :{opt strict}}computes the strict version of the test. p=c/N, with c = #{c -(}|T| > |T(obs)|{c )-}{p_end}

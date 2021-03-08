@@ -1,5 +1,6 @@
-*! version 1.1.7 feb2020.
+*! version 1.1.8 mar2021.
 ***** Changelog
+*1.1.8 saveresampling not accepts , replace
 *1.1.7 restore results of original estimation
 *1.1.6 fixes for spaces in filenames
 *1.1.5 some fixes for filenames
@@ -18,19 +19,6 @@
 *1.0.2 "if" and  "in" for the subcommand will now be considered irrespective of "drop" or "nodrop" are specified 
 *1.0.1 now can be called with the option RANDOMIZATIONProgram OR SAMPLINGprogram
 
-/* just some sample code i sometimes use for debuggin
-set seed 2
-clear
-set obs 40
-gen cluster=_n
-gen tr = mod(_n,2)
-expand 20
-replace tr=2 if rnormal()>3
-gen y = rnormal()+tr*0.01
-reg y tr
-ritest tr _b[tr], cluster(cluster) seed(1): reg y tr if tr!=2
-ritest tr r(rho), cluster(cluster) seed(1): corr y tr if tr!=2
-*/
 
 
 cap program drop ritest
@@ -199,6 +187,12 @@ program RItest, rclass
 		tempfile resamplingtemp
 		gen `originalorder'=_n
 		qui save `"`resamplingtemp'"'
+		
+		_prefix_saving `saveresampling'
+		local fname = s(filename)
+		local freplace = s(replace)
+		local sr_replace : subinstr local freplace "." ""
+		local sr_filename : subinstr local fname ".dta" ""
 	}
 	if "`strata'" == "" {
             tempvar strata
@@ -582,7 +576,8 @@ program RItest, rclass
 	// cleanup post
 	postclose `postnam'
 	if `"`saveresampling'"'!="" {
-		cp "`resamplingtemp'" `"`saveresampling'"'
+		cp "`resamplingtemp'" `"`sr_filename'.dta"', `replace'
+		
 	}
 
 	// load file `saving' with permutation results and display output
