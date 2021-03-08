@@ -26,18 +26,16 @@ Heß, Simon, "Randomization inference with Stata: A guide and software" *Stata J
 There are no known bugs. Please report any unintend or surprising behaviour. 
 
 ## Changelog
-
-George S. Ford
  - **1.1.8** The savings()-option and the savererandomization()-/saveresampling()-option, now auto-appends the ".dta" and allows to specify ", replace".
- - **1.1.4** Added a reject()-option, as permute has it.
+ - **1.1.4** Added a reject()-option, as permute has it. h/t George s. Ford
  - **1.1.2** Fixed the issue that data sanity checks were applied to the full sample, even if and [if] or [in]-statement was used to restrict analysis to a subsample. h/t Fred Finan
- - **1.1.0** added an option (fixlevels()) to constrain re-randomization to certain values of the treatment variable. This can be used for pairwise tests in multi-treatment experiments, by  restricting permutation to only some treatment arms. 
- - **1.0.9** added the strict and the eps option to the helpfile and added parameter-checks so that "strict" enforces "eps(0)". h/t Katharina Nesselrode
- - **1.0.8** minor bugfix and I got rid of the google analytics part
- - **1.0.7** Jason Kerwin pointed out that when string variables were used as strata or cluster ids, all observations were treated as belonging to the same. This is fixed with this version. Also I sped up execution time by dropping unneeded code.
+ - **1.1.0** Added an option (fixlevels()) to constrain re-randomization to certain values of the treatment variable. This can be used for pairwise tests in multi-treatment experiments, by  restricting permutation to only some treatment arms. 
+ - **1.0.9** Added the strict and the eps option to the helpfile and added parameter-checks so that "strict" enforces "eps(0)". h/t Katharina Nesselrode
+ - **1.0.8** Minor bugfix and I got rid of the google analytics part
+ - **1.0.7** Kason Kerwin pointed out that when string variables were used as strata or cluster ids, all observations were treated as belonging to the same. This is fixed with this version. Also I sped up execution time by dropping unneeded code.
  - **1.0.6** Jason Kerwin pointed out an issue with the "saveresampling()"-option. This version fixes this.
  - **1.0.4** David McKenzie pointed out that under some conditions, the random seed was ignored. This is fixed with this version.
- - **1.0.3** is the version that was published in the Stata Journal.
+ - **1.0.3** Is the version that was published in the Stata Journal.
 
 ## Media Coverage
  - [Finally, a way to do easy randomization inference in Stata!](http://blogs.worldbank.org/impactevaluations/finally-way-do-easy-randomization-inference-stata) (blog post by David McKenzie)
