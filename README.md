@@ -26,6 +26,9 @@ Heß, Simon, "Randomization inference with Stata: A guide and software" *Stata J
 There are no known bugs. Please report any unintend or surprising behaviour. 
 
 ## Changelog
+
+George S. Ford
+ - **1.1.8** The savings()-option and the savererandomization()-/saveresampling()-option, now auto-appends the ".dta" and allows to specify ", replace".
  - **1.1.4** Added a reject()-option, as permute has it.
  - **1.1.2** Fixed the issue that data sanity checks were applied to the full sample, even if and [if] or [in]-statement was used to restrict analysis to a subsample. h/t Fred Finan
  - **1.1.0** added an option (fixlevels()) to constrain re-randomization to certain values of the treatment variable. This can be used for pairwise tests in multi-treatment experiments, by  restricting permutation to only some treatment arms. 
