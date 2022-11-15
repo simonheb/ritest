@@ -34,7 +34,7 @@ cap program drop rit_TableFoot
 cap program drop ClearE
 
 program ritest
-	version 17
+	version 13
 
 	set prefix ritest
 
@@ -59,7 +59,7 @@ program ritest
 end
 
 program RItest, rclass
-	version 17
+	version 13
 	local ritestversion "1.1.4"
 	// get name of variable to permute
 	gettoken resampvar 0 : 0, parse(" ,:")
