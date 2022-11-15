@@ -1,6 +1,7 @@
 *! version 1.1.8 mar2021.
 ***** Changelog
-*1.1.8 saveresampling not accepts , replace
+*1.17.1 changed the interpreter to stata 17
+*1.1.8 saveresampling now accepts , replace
 *1.1.7 restore results of original estimation
 *1.1.6 fixes for spaces in filenames
 *1.1.5 some fixes for filenames
@@ -33,7 +34,7 @@ cap program drop rit_TableFoot
 cap program drop ClearE
 
 program ritest
-	version 13
+	version 17
 
 	set prefix ritest
 
@@ -58,7 +59,7 @@ program ritest
 end
 
 program RItest, rclass
-	version 13
+	version 17
 	local ritestversion "1.1.4"
 	// get name of variable to permute
 	gettoken resampvar 0 : 0, parse(" ,:")
