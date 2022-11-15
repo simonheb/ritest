@@ -1,4 +1,4 @@
-*! version 1.1.8 mar2021.
+*! version 1.17.1 nov2022.
 ***** Changelog
 *1.17.1 changed the interpreter to stata 17
 *1.1.8 saveresampling now accepts , replace
