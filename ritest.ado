@@ -1,5 +1,6 @@
-*! version 1.17.1 nov2022.
+*! version 1.18 nov2023.
 ***** Changelog
+*1.18. the external file permuations method was overwriting the permutation file with a sorted version of itself. fixed that.
 *1.17.1 changed the interpreter to stata 17
 *1.1.8 saveresampling now accepts , replace
 *1.1.7 restore results of original estimation
@@ -224,6 +225,7 @@ program RItest, rclass
 	local noi = cond("`noisily'"=="", "*", "noisily")
 
 	if "`samplingsourcefile'"!="" { //check if samplingsourcefile is okay and sort
+			tempfile samplingsourcefilesorted
             preserve
             qui use `"`samplingsourcefile'"', clear
             qui sort `samplingmatchvar', stable
@@ -232,7 +234,8 @@ program RItest, rclass
                 di as err "Permutation dataset does not contain enough permutations to complete `reps' repetitions"
                 exit 2001
             }
-            qui save `"`samplingsourcefile'"', replace
+            qui save `"`samplingsourcefilesorted'"', replace
+			local samplingsourcefile `"`samplingsourcefilesorted'"'
             restore
     }
 
