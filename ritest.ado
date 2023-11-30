@@ -1,5 +1,6 @@
-*! version 1.18 nov2023.
+*! version 1.19 nov2023.
 ***** Changelog
+*1.19 fixed a bug that in introduced in 1.1.8 (not relevant for results, only caused an error message when saving the resampled treatment)
 *1.18. the external file permuations method was overwriting the permutation file with a sorted version of itself. fixed that.
 *1.17.1 changed the interpreter to stata 17
 *1.1.8 saveresampling now accepts , replace
@@ -580,7 +581,7 @@ program RItest, rclass
 	// cleanup post
 	postclose `postnam'
 	if `"`saveresampling'"'!="" {
-		cp "`resamplingtemp'" `"`sr_filename'.dta"', `replace'
+		cp "`resamplingtemp'" `"`sr_filename'.dta"', `sr_replace'
 		
 	}
 
