@@ -689,7 +689,7 @@ program permute_simple
 		drop `resampvar'  `nn' `ind' `rorder'
 		rename `newt' `resampvar' 
     }
-	xtset `xt1' `xt2'
+    cap xtset `xt1' `xt2'
 end
 program permute_extfile
     syntax ,file(string) matchvars(varlist) run(integer) resampvar(varlist)
