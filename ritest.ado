@@ -657,7 +657,12 @@ program RItest, rclass
 end
 program permute_simple
     syntax , strata(varname) cluster(varname) resampvar(varname) *
-    
+    //
+    cap xtset
+    if (_rc == 0) {
+	local xt1 r(panelvar)
+	local xt2 r(timevar)
+    }
     tempvar ind nn newt rorder
 	//create a random variable
     gen `rorder'=runiform()
@@ -683,6 +688,7 @@ program permute_simple
 		drop `resampvar'  `nn' `ind' `rorder'
 		rename `newt' `resampvar' 
     }
+	xtset `xt1' `xt2'
 end
 program permute_extfile
     syntax ,file(string) matchvars(varlist) run(integer) resampvar(varlist)
