@@ -1,5 +1,6 @@
-*! version 1.19 nov2023.
+*! version 1.20 mar2024.
 ***** Changelog
+*added xtset support to permute_simple
 *1.19 fixed a bug that in introduced in 1.1.8 (not relevant for results, only caused an error message when saving the resampled treatment)
 *1.18. the external file permuations method was overwriting the permutation file with a sorted version of itself. fixed that.
 *1.17.1 changed the interpreter to stata 17
@@ -660,8 +661,8 @@ program permute_simple
     //
     cap xtset
     if (_rc == 0) {
-	local xt1 r(panelvar)
-	local xt2 r(timevar)
+	local xt1 = r(panelvar)
+	local xt2 = r(timevar)
     }
     tempvar ind nn newt rorder
 	//create a random variable
