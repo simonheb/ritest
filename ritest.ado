@@ -1,6 +1,7 @@
-*! version 1.20 mar2024.
+*! version 1.21 mar2024.
 ***** Changelog
-*added xtset support to permute_simple
+*1.21 added the "reseed" option to set the seed in every loop iteration. This can ensure that code is replicable even if function that is called on changes 
+*1.20 added xtset support to permute_simple
 *1.19 fixed a bug that in introduced in 1.1.8 (not relevant for results, only caused an error message when saving the resampled treatment)
 *1.18. the external file permuations method was overwriting the permutation file with a sorted version of itself. fixed that.
 *1.17.1 changed the interpreter to stata 17
@@ -123,6 +124,7 @@ program RItest, rclass
 		CLUster(varlist)        ///
 		FIXlevels(string)        ///
 		SEED(string)		///
+		reseed                  /// resets the seed in every iteration
 		EPS(real 1e-7)		/// -Results- options
 		SAMPLINGSourcefile(string)          ///
 		RANDOMIZATIONSourcefile(string) ///syno ^
@@ -286,10 +288,9 @@ program RItest, rclass
 		di as text " (these values are being subtracted from the outcome)"
 	}
 
-				
 
 	_prefix_clear, e r
-	// run the command using the entire dataset (to get the estimate) aftera imposing `null'
+	// run the command using the entire dataset (to get the estimate) after imposing `null'
 	qui `noisily'		///
                 `command'
 	tempname originalestimates
@@ -487,11 +488,6 @@ program RItest, rclass
 		local samplingprogramoptions `"file(`"`samplingsourcefile'"')      matchvars(`samplingmatchvar')"'
     }
 	
-	if ("`noanalytics'"=="") 	{ //This was the GOOGLE-ANALYTICS bit
-	}
-	else {
-		di as err "you specified noanalytics option. The google analytics tracking has been removed from the code permantly"
-	}
 	if "`dots'" == "*" {
 		local noiqui noisily quietly
 	}
@@ -505,6 +501,11 @@ program RItest, rclass
 	forvalues i = 1/`reps' {
 		//for debugging: display seed
 		//noi noi noi di as err substr(c(rngstate), 4996,.)
+		
+		if "`seed'" != "" & "`reseed'" != "" {
+			local currseed = `seed'+`i'
+			`version' set seed `currseed'+ 
+		}
 
 		cap `samplingprogram', run(`i') resampvar(`resampvar') `samplingprogramoptions'
 		if _rc!=0 {
