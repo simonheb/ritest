@@ -217,6 +217,7 @@ program RItest, rclass
         
     // set the seed
 	if "`seed'" != "" {
+		local origseed `seed'
 		`version' set seed `seed'
 	}
 	local seed `c(seed)'
@@ -499,11 +500,9 @@ program RItest, rclass
 	}
 	local rejected 0
 	forvalues i = 1/`reps' {
-		//for debugging: display seed
-		//noi noi noi di as err substr(c(rngstate), 4996,.)
 		
-		if "`seed'" != "" & "`reseed'" != "" {
-			local currseed = `seed'+`i'
+		if "`origseed'" != "" & "`reseed'" != "" {
+			local currseed = `origseed'+`i'
 			`version' set seed `currseed'+ 
 		}
 
@@ -636,7 +635,7 @@ program RItest, rclass
 	char _dta[k_exp] `k_exp'
 	char _dta[N_strata] `nstrata'
 	char _dta[N_clust] `N_clust'
-	char _dta[seed] "`seed'"
+	char _dta[seed] "`origseed'"
 	char _dta[strata] `ustrata'
 	char _dta[strata_orignal_varnames] `"`strata_orignal_varnames'"'
 	char _dta[clustvar] `clustvar'
