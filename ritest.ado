@@ -503,7 +503,7 @@ program RItest, rclass
 		
 		if "`origseed'" != "" & "`reseed'" != "" {
 			local currseed = `origseed'+`i'
-			`version' set seed `currseed'+ 
+			`version' set seed `currseed'
 		}
 
 		cap `samplingprogram', run(`i') resampvar(`resampvar') `samplingprogramoptions'
