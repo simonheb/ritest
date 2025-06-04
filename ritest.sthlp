@@ -164,8 +164,8 @@ performed within each stratum defined by the values of {it:varlist}.
 performed treating each cluster as defined by {it:varlist} as one unit of assignment.
 
 {phang}
-{opth fixvalues(list)} specifies that the permutations have to be
-performed holding all observations fixed that have the specified values the resampling
+{opth fixlevel(list)} specifies that the permutations have to be
+performed holding all observations fixed that have the specified values of the resampling
 variable.
 This can be used for pairwise testing in experiments with more than two treatment arms.
 
